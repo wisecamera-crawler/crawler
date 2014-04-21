@@ -12,8 +12,6 @@ class Rating
     
     public $star;
     public $fork;
-    public $watch;
-    
-    public $star;
+    public $watch;    
 }
 
