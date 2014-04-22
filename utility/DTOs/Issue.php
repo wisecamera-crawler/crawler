@@ -2,7 +2,6 @@
 
 class Issue
 {
-    public $projectId;
     public $topic;
     public $open;
     public $close;

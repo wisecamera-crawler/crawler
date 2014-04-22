@@ -2,8 +2,6 @@
 
 class Rating
 {
-    public $projectId;
-    
     public $oneStar;
     public $twoStar;
     public $threeStar;

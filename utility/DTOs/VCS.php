@@ -2,7 +2,6 @@
 
 class VCS
 {
-    public $projectId;
     public $commit;
     public $file;
     public $line;
