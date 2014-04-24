@@ -2,14 +2,14 @@
 
 class Rating
 {
-    public $oneStar;
-    public $twoStar;
-    public $threeStar;
-    public $fourStar;
-    public $fiveStar;
+    public $oneStar = 0;
+    public $twoStar = 0;
+    public $threeStar = 0;
+    public $fourStar = 0;
+    public $fiveStar = 0;
     
-    public $star;
-    public $fork;
-    public $watch;    
+    public $star = 0;
+    public $fork = 0;
+    public $watch = 0;    
 }
 

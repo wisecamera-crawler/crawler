@@ -1,8 +1,8 @@
 <?php
 class Project
 {
-    public $id;
-    public $url;
-    public $repoType;
+    public $id = "";
+    public $url = "";
+    public $repoType = "";
 }
 

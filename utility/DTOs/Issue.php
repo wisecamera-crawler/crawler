@@ -2,10 +2,10 @@
 
 class Issue
 {
-    public $topic;
-    public $open;
-    public $close;
-    public $article;
-    public $account;
+    public $topic = 0;
+    public $open = 0;
+    public $close = 0;
+    public $article = 0;
+    public $account = 0;
 }
 
