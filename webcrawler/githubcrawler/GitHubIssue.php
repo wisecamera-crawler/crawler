@@ -1,5 +1,8 @@
 <?php
 
+require_once("utility/WebUtility.php");
+require_once("utility/ParseUtility.php");
+
 class GitHubIssue
 {
     private $baseurl;
@@ -8,7 +11,7 @@ class GitHubIssue
     public function __construct($url)
     {
         $this->baseurl = $url;
-        $this->mainPageHtml = $this->getHtmlContent($url);
+        $this->mainPageHtml = WebUtility::getHtmlContent($url);
     }
 
     public function getTotalIssue()
@@ -20,23 +23,13 @@ class GitHubIssue
     {
         preg_match('/([0-9],?)+ Open/', $this->mainPageHtml, $matches);
         $arr = explode(' ', $matches[0]);
-        return $this->intStrToInt($arr[0]);
+        return ParseUtility::intStrToInt($arr[0]);
     }
 
     public function getCloseIssue(){
         preg_match('/([0-9],?)+ Closed/', $this->mainPageHtml, $matches);
         $arr = explode(' ', $matches[0]);
-        return $this->intStrToInt($arr[0]);
-    }
-
-    private function intStrToInt($str){
-        $value = 0;
-        for($i = 0; $i < strlen($str); ++$i) {
-            if($str[$i] >= '0' AND $str[$i] <= '9') {
-                $value = $value*10 + ($str[$i] - '0');
-            }
-        }
-        return $value;
+        return ParseUtility::intStrToInt($arr[0]);
     }
 
     public function traverseIssues(&$totalComments, &$totalAuthors){
@@ -45,7 +38,7 @@ class GitHubIssue
         $authors = array();
         for($i = 1; $i <= $issueCount; ++$i) {
             //TODO : getHTMLContent need to be able for redirection
-            //$html = $this->getHtmlContent($this->baseurl . "/" . $i);
+            //$html = WebUtility::getHtmlContent($this->baseurl . "/" . $i);
             $html = file_get_contents($this->baseurl . "/" . $i);  
             $totalComments += $this->getCommentCountInSingleIssuePage($html);
             $this->getAuthorCountInSingleIssuePage($html, $authors);
@@ -75,24 +68,5 @@ class GitHubIssue
         return sizeof($localAuthorArr);
     }
 
-    private function getHtmlContent($url)
-    {
-        $ch = curl_init();
-        $user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19";
-        curl_setopt($ch, CURLOPT_URL, $url);				
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);			
-        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);		
-							
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, True);
-        curl_setopt($ch, CURLOPT_CAPATH, "/certificate");
-        curl_setopt($ch, CURLOPT_CAINFO, "/certificate/server.crt");			
-				
-        $txt = curl_exec($ch);
-		curl_close($ch);
-
-        return $txt;
-    }
 }
 
