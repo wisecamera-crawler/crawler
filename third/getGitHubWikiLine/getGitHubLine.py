@@ -144,7 +144,7 @@ def htmlParser(tPage):
    myList = tree.xpath("//div[@class='markdown-body']//pre")
    lineSum += handler_pre(myList)   
 
-   print "\ntotal lines is %d" %(lineSum)
+   print "%d" %(lineSum)
 
 def assignPageAndOverrideArgu():
    DB(DB_ARG,'ENTER overrideArgu')

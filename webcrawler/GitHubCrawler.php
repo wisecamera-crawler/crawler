@@ -156,7 +156,11 @@ class GithubCrawler extends WebCrawler
     }
 
     private function fetchGitHubWikiLineCount($wikiName){
-        $commad = "python third/getWikiLine.py $this->baseUrl/wiki/$wikiName";	
+        $tmp = explode("/", $this->baseUrl);
+        $name = $tmp[3];
+        $project = $tmp[4];
+
+        $commad = "python third/getGitHubWikiLine/getGitHubLine.py $name/$project/wiki/$wikiName";
         $output = shell_exec($commad);				
         return $output;
     }
