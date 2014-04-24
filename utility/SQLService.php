@@ -69,7 +69,7 @@ class SQLService
             VALUES('$this->projectId', '$wiki->pages', '$wiki->line', '$wiki->update')");
 
         $this->connection->query("UPDATE `project`
-            set `wiki_page` = '$wiki->pages',
+            set `wiki_pages` = '$wiki->pages',
                 `wiki_line` = '$wiki->line',
                 `wiki_update` = '$wiki->update'
             WHERE `project_id` = '$this->projectId'");
@@ -161,14 +161,22 @@ class SQLService
                 `watch` = '$ranking->watch', 
                 `1-star` = '$ranking->oneStar',
                 `2-star` = '$ranking->twoStar',
-                `3-star` = '$ranking->threStar',
+                `3-star` = '$ranking->threeStar',
                 `4-star` = '$ranking->fourStar',
                 `5-star` = '$ranking->fiveStar'
             WHERE `project_id` = '$this->projectId'"); 
     }
 
+    public function getProjectInfo($type)
+    {
+        return $this->lastData[$type];
+    }
+
     private function writeSummaray()
     {
+        if($this->lastData == null)
+            return;
+
         $arr = array($this->wikiState, $this->vcsState, 
             $this->issueState, $this->downloadState);
         if(in_array("cannot_get_data", $arr) OR in_array("can_not_resolve", $arr))
