@@ -10,5 +10,11 @@ class ParseUtility
         }
         return $value;
     }
+
+    static public function resolveHost($fullUrl)
+    {
+        $arr = preg_split("/[\/\:]/", $fullUrl);
+        return $arr[3];
+    }
 }
 

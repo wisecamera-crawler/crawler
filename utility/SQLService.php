@@ -10,12 +10,13 @@ class SQLService
 
     private $connection;
     private $projectId;
+    private $proxy;
 
     private $startTime, $endTime;
     private $wikiState, $vcsState, $issueState, $downloadState;
     private $lastData;
 
-    public function __construct($projectId)
+    public function __construct($projectId, $proxy = "127.0.0.1")
     {
         $dsn = "mysql:host=" . SQLService::$ip . ";dbname=nsc";
         $this->connection = new PDO($dsn, SQLService::$user, SQLService::$password);
@@ -29,6 +30,7 @@ class SQLService
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $this->lastData = $result->fetch();
         $this->startTime = date("Y-m-d H:i:s");
+        $this->proxy = $proxy;
     }
 
     public function __destruct()
@@ -186,8 +188,10 @@ class SQLService
         else
             $status = "no_change";
         
-        //TODO : proxy ip
-        $ip = "127.0.0.1";
+        if($this->proxy != "127.0.0.1")
+            $ip = ParseUtility::resolveHost($this->proxy);
+        else
+            $ip = $this->proxy;
 
         $this->connection->query("INSERT INTO `crawl_status`
             (`project_id`, `status`, `wiki`, `vcs`, `issue`, 

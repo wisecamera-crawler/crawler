@@ -12,6 +12,10 @@ require_once "utility/DTO.php";
 require_once "webcrawler/WebCrawler.php";
 require_once "webcrawler/GitHubCrawler.php";
 require_once "utility/SQLService.php";
+require_once "utility/WebUtility.php";
+
+//WebUtility::useProxy(true);
+//$proxy = WebUtility::getProxy();
 
 SQLService::$ip = "127.0.0.1";
 SQLService::$user = "root";

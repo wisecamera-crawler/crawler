@@ -2,6 +2,9 @@
 
 class WebUtility
 {
+    static private $isUseProxy = false;
+    static private $proxy = "";
+
     static public function getHtmlContent($url)
     {
         $ch = curl_init();
@@ -10,17 +13,37 @@ class WebUtility
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);	
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);			
         curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);		
-							
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, True);
         curl_setopt($ch, CURLOPT_CAPATH, "/certificate");
-        curl_setopt($ch, CURLOPT_CAINFO, "/certificate/server.crt");			
-				
+        curl_setopt($ch, CURLOPT_CAINFO, "/certificate/server.crt");
+        if(WebUtility::$isUseProxy == true)
+            curl_setopt($ch, CURLOPT_PROXY, WebUtility::$proxy);
         $txt = curl_exec($ch);
 		curl_close($ch);
 
         return $txt;
     }
 
+    static public function useProxy($bool)
+    {
+        WebUtility::$isUseProxy = $bool;
+        
+        if($bool == true)
+            WebUtility::$proxy = WebUtility::chooseProxy();
+        else
+            WebUtility::$proxy = "";
+    }
+
+    static public function getProxy()
+    {
+        return WebUtility::$proxy;
+    }
+
+    static private function chooseProxy()
+    {
+        //TODO : how to choose?
+        return "socks5://60.245.28.93:2001";
+    }
 }
 
