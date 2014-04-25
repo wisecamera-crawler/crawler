@@ -25,6 +25,8 @@ class SQLService
         $this->vcsState = "no_change";
         $this->issueState = "no_change";
         $this->downloadState = "no_change";
+        $this->connection->query("SET CHARACTER SET utf8 ");
+        $this->connection->query("SET NAMES utf8");
         $result = $this->connection->query("SELECT * FROM `project` 
             WHERE `project_id` = '$projectId'");
         $result->setFetchMode(PDO::FETCH_ASSOC);
