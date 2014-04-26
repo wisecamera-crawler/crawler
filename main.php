@@ -13,6 +13,8 @@ require_once "webcrawler/WebCrawler.php";
 require_once "webcrawler/GitHubCrawler.php";
 require_once "utility/SQLService.php";
 require_once "utility/WebUtility.php";
+require_once "repostat/RepoStat.php";
+require_once "repostat/GitStat.php";
 
 //WebUtility::useProxy(true);
 //$proxy = WebUtility::getProxy();
@@ -55,8 +57,13 @@ $dlArray = array();
 $webCrawler->getDownload($dlArray);
 $SQL->insertDownload($dlArray);
 
+//TODO stat factory
+$repoStat = new GitStat($id);
 
-//TODO : VCS
 $vcs = new VCS();
-$vcsList = array();
+$repoStat->getSummary($vcs);
+$SQL->insertVCS($vcs);
 
+$cList = array();
+$repoStat->getDataByCommiters($cList);
+$SQL->insertVCSCommiters($cList);
