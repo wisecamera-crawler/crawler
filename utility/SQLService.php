@@ -197,7 +197,7 @@ class SQLService
 
         $this->connection->query("INSERT INTO `crawl_status`
             (`project_id`, `status`, `wiki`, `vcs`, `issue`, 
-            `download`, `ip`, `starttime`, `endtime`)
+            `download`, `proxy_ip`, `starttime`, `endtime`)
             VALUES('$this->projectId', '$status', '$this->wikiState', '$this->vcsState',
             '$this->issueState', '$this->downloadState', '$ip',
             '$this->startTime', '$this->endTime')");
