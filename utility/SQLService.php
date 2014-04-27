@@ -18,7 +18,7 @@ class SQLService
 
     public function __construct($projectId, $proxy = "127.0.0.1")
     {
-        $dsn = "mysql:host=" . SQLService::$ip . ";dbname=nsc";
+        $dsn = "mysql:host=" . SQLService::$ip . ";dbname=NSC";
         $this->connection = new PDO($dsn, SQLService::$user, SQLService::$password);
         $this->projectId = $projectId;
         $this->wikiState = "no_change";

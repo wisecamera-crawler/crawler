@@ -58,7 +58,7 @@ $webCrawler->getDownload($dlArray);
 $SQL->insertDownload($dlArray);
 
 //TODO stat factory
-$repoStat = new GitStat($id);
+$repoStat = new GitStat($id, $url);
 
 $vcs = new VCS();
 $repoStat->getSummary($vcs);

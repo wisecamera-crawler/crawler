@@ -3,17 +3,19 @@
 class GitStat
 {
     
-    public function __construct($projectId)
+    public function __construct($projectId, $url)
     {
         $this->projectId = $projectId;
-        exec("cd repo; cd $this->projectId; git pull", $arr);
+        if(is_dir("repo/$this->projectId"))
+            exec("cd repo; cd $this->projectId; git pull", $arr);
+        else
+            exec("cd repo; git clone $url $this->projectId", $arr);
     }
 
     public function getSummary(VCS & $vcs)
     {   
         $path = "repostat/gitstat";
         exec("gitstats repo/$this->projectId test1");
-        exec("php $path/crawlerFilesAndLines.php", $outputFilesAndLines);
 
         $vcs->user = $this->getAuthor();
         $vcs->commit = $this->getCommit();
