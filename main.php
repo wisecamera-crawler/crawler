@@ -1,7 +1,7 @@
 <?php
+namespace wisecamera;
 
-
-if($argc != 2) {
+if ($argc != 2) {
     echo "usage php main.php <project id>\n";
     exit(0);
 }
@@ -25,8 +25,9 @@ SQLService::$password = "openfoundry";
 
 $SQL = new SQLService($id);
 $url = $SQL->getProjectInfo("url");
-if($url == null)
+if ($url == null) {
     return;
+}
 echo "$id : $url\n";
 
 //TODO : crawler factory

@@ -1,4 +1,5 @@
 <?php
+namespace wisecamera;
 
 class Download
 {
@@ -6,4 +7,3 @@ class Download
     public $name = "";
     public $count = 0;
 }
-

@@ -1,4 +1,5 @@
 <?php
+namespace wisecamera;
 
 class Rating
 {
@@ -7,9 +8,8 @@ class Rating
     public $threeStar = 0;
     public $fourStar = 0;
     public $fiveStar = 0;
-    
+
     public $star = 0;
     public $fork = 0;
-    public $watch = 0;    
+    public $watch = 0;
 }
-

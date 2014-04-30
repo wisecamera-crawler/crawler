@@ -1,4 +1,5 @@
 <?php
+namespace wisecamera;
 
 class VCSCommiter
 {

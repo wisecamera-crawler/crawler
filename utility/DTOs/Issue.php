@@ -1,4 +1,5 @@
 <?php
+namespace wisecamera;
 
 class Issue
 {
@@ -8,4 +9,3 @@ class Issue
     public $article = 0;
     public $account = 0;
 }
-

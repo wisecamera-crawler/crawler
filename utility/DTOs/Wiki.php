@@ -1,4 +1,5 @@
 <?php
+namespace wisecamera;
 
 class Wiki
 {
@@ -6,4 +7,3 @@ class Wiki
     public $line = 0;
     public $update = 0;
 }
-

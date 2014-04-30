@@ -1,4 +1,5 @@
 <?php
+namespace wisecamera;
 
 class VCS
 {
@@ -8,4 +9,3 @@ class VCS
     public $size = 0;
     public $user = 0;
 }
-

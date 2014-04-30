@@ -1,4 +1,5 @@
 <?php
+namespace wisecamera;
 
 abstract class RepoStat
 {
@@ -6,4 +7,3 @@ abstract class RepoStat
     abstract public function getSummary(VCS & $vcs);
     abstract public function getDataByCommiters(array & $commiters);
 }
-
