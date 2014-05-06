@@ -18,8 +18,9 @@ class OFIssue
 
     public function getTotalIssue()
     {
-        if($this->issueCount != -1)
+        if ($this->issueCount != -1) {
             return $this->issueCount;
+        }
 
         $content = WebUtility::getHtmlContent(
             "https://www.openfoundry.org/rt/Search/Results.html?"
@@ -34,14 +35,15 @@ class OFIssue
 
     public function getCloseIssue()
     {
-        if($this->closeIssue != -1)
+        if ($this->closeIssue != -1) {
             return $this->closeIssue;
+        }
 
         $issueCount = $this->getTotalIssue();
         $content = WebUtility::getHtmlContent(
             "https://www.openfoundry.org/rt/Search/Results.html?"
-            . "Query=Queue%20=%20%27" . $this->id . "%27&Rows=" . 
-            $issueCount
+            . "Query=Queue%20=%20%27" . $this->id . "%27&Rows="
+            . $issueCount
         );
 
         $this->closeIssue = preg_match_all(
@@ -77,10 +79,10 @@ class OFIssue
 
     private function traverseIssues()
     {
-         $content = WebUtility::getHtmlContent(
+        $content = WebUtility::getHtmlContent(
             "https://www.openfoundry.org/rt/Search/Results.html?"
-            . "Query=Queue%20=%20%27" . $this->id . "%27&Rows=" . 
-            $this->getTotalIssue()
+            . "Query=Queue%20=%20%27" . $this->id . "%27&Rows="
+            . $this->getTotalIssue()
         );
 
         $issueIds = $this->resolveIssueIds($content);
@@ -134,7 +136,7 @@ class OFIssue
         $htmlArr = explode("\n", $html);
         for ($i = 0; $i < sizeof($htmlArr); ++$i) {
             $line = $htmlArr[$i];
-            if($line === '    <td class="description">') {
+            if ($line === '    <td class="description">') {
                 $nextLine = $htmlArr[$i+1];
                 $temp = explode(" ", $nextLine);
                 $authors[$temp[6]] = 0;
