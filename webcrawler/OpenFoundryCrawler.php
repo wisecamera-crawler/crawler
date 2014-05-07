@@ -9,7 +9,6 @@ class OpenFoundryCrawler extends WebCrawler
     {
         $arr = explode("/", $url);
         $this->_ofId =  $arr[5];
-        echo $this->_ofId;
         $this->baseUrl = $url;
     }
 
@@ -25,6 +24,43 @@ class OpenFoundryCrawler extends WebCrawler
     
     public function getWiki(Wiki & $wiki, array & $wikiPageList)
     {
+        $content = WebUtility::getHtmlContent($this->baseUrl . "/wiki/list");
+        $htmlArr = explode("\n", $content);
+
+        $pos = 290;
+        while (
+            isset($htmlArr[$pos]) and
+            $htmlArr[$pos] !== "    <th>修改時間</th>" 
+        ) {
+            ++$pos;
+        }
+
+        $update = 0;
+        $line = 0;
+        while(
+            isset($htmlArr[$pos]) and
+            $htmlArr[$pos+2] !== "  </table>"
+        ) {
+            $pos += 4;
+            
+            $wikiPage = new WikiPage();
+            $wikiPage->title = trim(strip_tags($htmlArr[$pos]));
+            $arr = explode("\"", $htmlArr[$pos]);
+            $wikiPage->url = "https://www.openfoundry.org" . $arr[1];
+            $wikiPage->update = (int)trim(strip_tags($htmlArr[$pos+3]));
+            $update += $wikiPage->update;
+            $wikiPage->line = $this->_getWikiPageLine($wikiPage->url);
+            $line += $wikiPage->line;
+
+            $wikiPageList []= $wikiPage;
+            
+            $pos += 5;
+            //break;
+        }
+        
+        $wiki->pages = sizeof($wikiPageList);
+        $wiki->update = $update;
+        $wiki->line = $line;
     }
 
     public function getRating(Rating & $rating)
@@ -52,6 +88,21 @@ class OpenFoundryCrawler extends WebCrawler
                 $download []= $downloadUnit;
             }
         }
-
     }
+
+    private function _getWikiPageLine($url)
+    {
+        $content = WebUtility::getHtmlContent($url);
+        preg_match("/<hr\/>.*<hr\/>/s", $content, $matches);
+        $htmlArr = explode("\n", $matches[0]);
+        $lineCount = 0;
+        foreach ($htmlArr as $line) {
+            $line = trim(strip_tags($line));
+            if(strlen($line) != 0) {
+                ++$lineCount;
+            }
+        }
+        return $lineCount;
+    }
+
 }

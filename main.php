@@ -10,9 +10,11 @@ $id = $argv[1];
 
 require_once "utility/DTO.php";
 require_once "webcrawler/WebCrawler.php";
+require_once "webcrawler/githubcrawler/GitHubIssue.php";
 require_once "webcrawler/GitHubCrawler.php";
 require_once "utility/SQLService.php";
 require_once "utility/WebUtility.php";
+require_once "utility/ParseUtility.php";
 require_once "repostat/RepoStat.php";
 require_once "repostat/GitStat.php";
 

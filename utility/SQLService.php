@@ -1,7 +1,7 @@
 <?php
 
-//require_once "DTO.php";
-namespace wisecamera;
+require_once "DTO.php";
+//namespace wisecamera;
 
 use \PDO;
 
