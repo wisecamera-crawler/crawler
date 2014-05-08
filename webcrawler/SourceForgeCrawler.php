@@ -38,8 +38,9 @@ class SourceForgeCrawler extends WebCrawler
     {
         $this->baseUrl = $url;
         $arr = explode("/", $url);
-        $this->id = $arr[4];
+        $this->id = $arr[3];
     }
+
     /**
      * SourceForge issue crawler
      *
@@ -63,7 +64,7 @@ class SourceForgeCrawler extends WebCrawler
         }
         //Need to take care sometimes will get internal server error
         preg_match_all('/results of (\d*) <\/strong><\/p>/', $issueMainPage, $total_array);
-        if (sizeof($total_array)>0) {
+        if (sizeof($total_array[1])>0) {
             $comments=0;
             $authors=array();
             $total_issue=$total_array[1][0];
@@ -94,10 +95,10 @@ class SourceForgeCrawler extends WebCrawler
                     );
                 }
             }
+            $issue->topic = $total_issue;
+            $issue->article = $comments;
+            $issue->account= sizeof($authors);
         }
-        $issue->topic = $total_issue;
-        $issue->article = $comments;
-        $issue->account= sizeof($authors);
     }
 
     /**
@@ -172,12 +173,14 @@ class SourceForgeCrawler extends WebCrawler
         $rank3[1]=str_replace(array("\r","\n","\t"," "), '', $rank3[1]);
         $rank2[1]=str_replace(array("\r","\n","\t"," "), '', $rank2[1]);
         $rank1[1]=str_replace(array("\r","\n","\t"," "), '', $rank1[1]);
-
-        $rating->fiveStar = $rank5[1];
-        $rating->fourStar = $rank4[1];
-        $rating->threeStar = $rank3[1];
-        $rating->twoStar = $rank2[1];
-        $rating->oneStar = $rank1[1];
+        
+        if (sizeof($rank5[1])>0) {
+            $rating->fiveStar = $rank5[1];
+            $rating->fourStar = $rank4[1];
+            $rating->threeStar = $rank3[1];
+            $rating->twoStar = $rank2[1];
+            $rating->oneStar = $rank1[1];
+        }
     }
     
     /**
@@ -201,11 +204,37 @@ class SourceForgeCrawler extends WebCrawler
 
         preg_match_all('/<tr title="(.*)" class="folder ">/', $DLMainPage, $DL_array);
         //Need to add folder/file check, if file, just add dl count into $DL_count_array
-        $this->traverseDL($url, $DL_array[1], $download);
+        if (sizeof($DL_array[1])>0) {
+            $this->traverseDL($url, $DL_array[1], $download);
+        }
     }
+
+    /**
+     * SourceForge repository url crawler
+     *
+     * This function access SourceForge website and get
+     * repository.
+     *
+     * @param string $type   Project repository type
+     *
+     * @return url to download repository
+     *
+     * @author Shannon Chang <shchang@gmail.com>
+     * @version 1.0
+     */
 
     public function getRepoUrl($type)
     {
+        $url = "http://sourceforge.net/p/$this->id/code/";
+        $this->baseUrl="none";
+        $CodePage = WebUtility::getHtmlContent($url);
+        preg_match_all('/<a href="#" class="btn" data-url="(.*)" title="Read Only">/', $CodePage, $Code_array);
+        if (sizeof($Code_array[1])>0) {
+            $url_array=explode(" ",$Code_array[1][0]);
+            if (strcmp($type, $url_array[0])==0) {
+                $this->baseUrl=$url_array[2]." ".$url_array[3];
+            }
+        }
         return $this->baseUrl;
     }
 
@@ -229,7 +258,11 @@ class SourceForgeCrawler extends WebCrawler
         $URL = "http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/history";
         $txt = WebUtility::getHtmlContent($URL);
         preg_match_all('/<span title/', $txt, $updateTimes);
-        return sizeof($updateTimes[0]);
+        if (sizeof($updateTimes[0])>0) {
+            return sizeof($updateTimes[0]);
+        } else {
+            return -2;
+        }
     }
 
     /**
@@ -259,7 +292,7 @@ class SourceForgeCrawler extends WebCrawler
             $lines_array=explode("<p>", $wiki_array[1]);
             return sizeof($lines_array);
         } else {
-            return 0;
+            return -2;
         }
     }
 
@@ -287,7 +320,7 @@ class SourceForgeCrawler extends WebCrawler
             //$DLMainPage = file_get_contents($url);
 
             preg_match_all('/<tr title="(.*)" class="folder ">/', $DLMainPage, $DL_array);
-            if (sizeof($DL_array)>0) {
+            if (sizeof($DL_array[1])>0) {
                 $this->traverseDL($url, $DL_array[1], $dlList);//keep trace file if it is a folder
             }
             preg_match_all('/<tr title="(.*)" class="file ">/', $DLMainPage, $file_array);
