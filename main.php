@@ -11,7 +11,10 @@ $id = $argv[1];
 require_once "utility/DTO.php";
 require_once "webcrawler/WebCrawler.php";
 require_once "webcrawler/githubcrawler/GitHubIssue.php";
+require_once "webcrawler/openfoundrycrawler/OFIssue.php";
 require_once "webcrawler/GitHubCrawler.php";
+require_once "webcrawler/OpenFoundryCrawler.php";
+require_once "webcrawler/WebCrawlerFactory.php";
 require_once "utility/SQLService.php";
 require_once "utility/WebUtility.php";
 require_once "utility/ParseUtility.php";
@@ -30,10 +33,8 @@ $url = $SQL->getProjectInfo("url");
 if ($url == null) {
     return;
 }
-echo "$id : $url\n";
 
-//TODO : crawler factory
-$webCrawler = new GithubCrawler($url);
+$webCrawler = WebCrawlerFactory::factory($url);
 
 $issue = new Issue();
 $webCrawler->getIssue($issue);

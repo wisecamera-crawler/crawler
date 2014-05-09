@@ -1,6 +1,7 @@
 <?php
 namespace wisecamera;
 
+require_once "utility/ParseUtility.php";
 //use \SimpleXMLElement;
 
 class OFIssue
@@ -29,7 +30,7 @@ class OFIssue
         preg_match('/<title>.*<\/title>/', $content, $matches);
         $match = explode(" ", $matches[0]);
         
-        $this->issueCount = (int) $match[1];
+        $this->issueCount = ParseUtility::intStrToInt($match[1]);
         return $this->issueCount;
     }
 
