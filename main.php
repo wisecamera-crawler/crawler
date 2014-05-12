@@ -20,6 +20,7 @@ require_once "utility/WebUtility.php";
 require_once "utility/ParseUtility.php";
 require_once "repostat/RepoStat.php";
 require_once "repostat/GitStat.php";
+require_once "webcrawler/SourceForgeCrawler.php";
 
 //WebUtility::useProxy(true);
 //$proxy = WebUtility::getProxy();

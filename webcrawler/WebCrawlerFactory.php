@@ -12,5 +12,13 @@ class WebCrawlerFactory
         if (strpos($url, "openfoundry") !== false) {
             return new OpenfoundryCrawler($url);
         }
+
+        if (strpos($url, "sourceforge") !== false) {
+            return new SourceForgeCrawler($url);
+        }
+
+        if (strpos($url, "google") !== false) {
+            return new GoogleCodeCrawler($url);
+        }
     }
 }
