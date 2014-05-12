@@ -4,6 +4,7 @@ namespace wisecamera;
 class OpenFoundryCrawler extends WebCrawler
 {
     private $_ofId;
+    private $baseUrl;
 
     public function __construct($url)
     {

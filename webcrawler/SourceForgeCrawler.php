@@ -6,6 +6,7 @@ require_once "utility/WebUtility.php";
 class SourceForgeCrawler extends WebCrawler
 {
     private $id;
+    private $baseUrl;
     //private $count;
     public function __construct($url)
     {
@@ -176,7 +177,7 @@ class SourceForgeCrawler extends WebCrawler
                     $download->name = $file_array[1][$i];
                     $download->url = $Link_array[1][$i];
                     $download->count =  $this->getSingleFileDLcountsPage($URL_array[1][$i]);
-                    $/dlList []= $download;
+                    $dlList []= $download;
 		        }
 		    }
 	    }

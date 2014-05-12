@@ -3,6 +3,13 @@ namespace wisecamera;
 
 class GitHubCrawler extends WebCrawler
 {
+    private $baseUrl;
+
+    public function __construct($url)
+    {
+        $this->baseUrl = $url;
+    }
+
     public function getIssue(Issue & $issue)
     {
         $gi = new GitHubIssue($this->baseUrl . "/issues");
