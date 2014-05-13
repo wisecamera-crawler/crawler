@@ -378,13 +378,13 @@ class GoogleCodeCrawler extends WebCrawler
         }
     }
 
-    public function curlUserStart()
+    public function getRating(Rating &$rating)
     {
         $html = $this->curlAutoLogin();
         $tmp = explode('<span id="star_count">', $html);
         $star =explode("<", $tmp[1]);
 
-        return $star[0];
+        $rating->star = (int)$star[0];
     }
 
     public function curlSource()
@@ -394,9 +394,4 @@ class GoogleCodeCrawler extends WebCrawler
         return $dataAry;
     }
 
-    public function getRating(Rating &$rating)
-    {
-        //TODO ???
-        $rating->star = 0;
-    }
 }
