@@ -1,7 +1,7 @@
 <?php
 namespace wisecamera;
 
-class GitStat
+class GitStat extends RepoStat
 {
 
     public function __construct($projectId, $url)

@@ -1,8 +1,7 @@
 <?php
 namespace wisecamera;
 
-require_once "utility/ParseUtility.php";
-//use \SimpleXMLElement;
+//require_once "utility/ParseUtility.php";
 
 class OFIssue
 {

@@ -31,7 +31,7 @@ do
          echo "target folder is:"$tFolder
          ;;         
    esac
-   if [ "$item" == "directory:" ]; then
+   if "$item" == "directory:"; then
       state='TRUE'
    else
       state='FALSE'

@@ -3,7 +3,7 @@ namespace wisecamera;
 
 class WebCrawlerFactory
 {
-    static public function factory($url)
+    public static function factory($url)
     {
         if (strpos($url, "github") !== false) {
             return new GithubCrawler($url);

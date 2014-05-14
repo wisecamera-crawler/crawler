@@ -64,12 +64,19 @@ $webCrawler->getDownload($dlArray);
 $SQL->insertDownload($dlArray);
 
 //TODO stat factory
-$repoStat = new GitStat($id, $url);
+$repoType = $SQL->getProjectInfo("vcs_type");
+if ($repoType == "Git") {
+    $repoStat = new GitStat($id, $url);
+} elseif ($repoType == "SVN") {
+    $repoStat = new SVNStat($id, $url);
+}
 
 $vcs = new VCS();
 $repoStat->getSummary($vcs);
+print_r($vcs);
 $SQL->insertVCS($vcs);
 
 $cList = array();
 $repoStat->getDataByCommiters($cList);
+print_r($cList);
 $SQL->insertVCSCommiters($cList);

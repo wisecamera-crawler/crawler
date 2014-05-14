@@ -3,19 +3,19 @@ namespace wisecamera;
 
 class OpenFoundryCrawler extends WebCrawler
 {
-    private $_ofId;
+    private $ofId;
     private $baseUrl;
 
     public function __construct($url)
     {
         $arr = explode("/", $url);
-        $this->_ofId =  $arr[5];
+        $this->ofId =  $arr[5];
         $this->baseUrl = $url;
     }
 
     public function getIssue(Issue & $issue)
     {
-        $ofIssue = new OFIssue($this->_ofId);
+        $ofIssue = new OFIssue($this->ofId);
         $issue->topic = $ofIssue->getTotalIssue();
         $issue->close = $ofIssue->getCloseIssue();
         $issue->open = $ofIssue->getOpenIssue();
@@ -31,14 +31,14 @@ class OpenFoundryCrawler extends WebCrawler
         $pos = 290;
         while (
             isset($htmlArr[$pos]) and
-            $htmlArr[$pos] !== "    <th>修改時間</th>" 
+            $htmlArr[$pos] !== "    <th>修改時間</th>"
         ) {
             ++$pos;
         }
 
         $update = 0;
         $line = 0;
-        while(
+        while (
             isset($htmlArr[$pos]) and
             $htmlArr[$pos+2] !== "  </table>"
         ) {
@@ -50,7 +50,7 @@ class OpenFoundryCrawler extends WebCrawler
             $wikiPage->url = "https://www.openfoundry.org" . $arr[1];
             $wikiPage->update = (int)trim(strip_tags($htmlArr[$pos+3]));
             $update += $wikiPage->update;
-            $wikiPage->line = $this->_getWikiPageLine($wikiPage->url);
+            $wikiPage->line = $this->getWikiPageLine($wikiPage->url);
             $line += $wikiPage->line;
 
             $wikiPageList []= $wikiPage;
@@ -91,7 +91,7 @@ class OpenFoundryCrawler extends WebCrawler
         }
     }
 
-    private function _getWikiPageLine($url)
+    private function getWikiPageLine($url)
     {
         $content = WebUtility::getHtmlContent($url);
         preg_match("/<hr\/>.*<hr\/>/s", $content, $matches);
@@ -99,11 +99,10 @@ class OpenFoundryCrawler extends WebCrawler
         $lineCount = 0;
         foreach ($htmlArr as $line) {
             $line = trim(strip_tags($line));
-            if(strlen($line) != 0) {
+            if (strlen($line) != 0) {
                 ++$lineCount;
             }
         }
         return $lineCount;
     }
-
 }

@@ -51,7 +51,8 @@ class WebUtility
         $result = $conn->query(
             "SELECT `proxy_ip`, `proxy_port`
                 FROM `proxy`
-                WHERE `status` = 'on-line'");
+                WHERE `status` = 'on-line'"
+        );
         $data = $result->fetchAll(\PDO::FETCH_ASSOC);
         $key = array_rand($data);
         return "socks5://" . $data[$key]["proxy_ip"] .  ":" . $data[$key]["proxy_port"];
