@@ -3,15 +3,17 @@ namespace wisecamera;
 
 class GoogleCodeCrawler extends WebCrawler
 {
-    private $projectName = "";    
-    private $ch= "";    
+    private $projectName = "";
+    private $ch= "";
     private $html= "";
     private $baseUrl = 'https://code.google.com/p/';
     private $baseLoginUrl= "";
     private $baseIssueUrl= "";
-    private $totalIssues = 0;
+    private $totalIssues = 0; // 總total issue數
+    private $totalIssuesDiscuss = 0; // 所有issue 討論總數
     private $user_agent = 'Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
     private $blockTagAry = array();
+    private $issueReplyAuthor = array();
 
     public function __construct($url)
     {
@@ -231,6 +233,27 @@ class GoogleCodeCrawler extends WebCrawler
         return $totalLine;
     }
 
+    private function getIssueDiscuss($id)
+    {
+        $url = $this->baseUrl."issues/detail?id=$id&can=1";
+        curl_setopt($this->ch, CURLOPT_URL, $url);
+        
+        $html = curl_exec($this->ch);
+        
+        $tmpReplyAry = explode('<span class="author">', $html);
+        
+        $this->totalIssuesDiscuss += count($tmpReplyAry);
+        
+        for ($i = 1; $i < count($tmpReplyAry); $i++) {
+            $tmpReplyAuthor = explode('</a>', $tmpReplyAry[$i]);
+            $replyAuthor = explode('>', $tmpReplyAuthor[1]);
+            
+            if (!in_array(substr($replyAuthor[1], 0, -4), $this->issueReplyAuthor)) {
+                $this->issueReplyAuthor[] = substr($replyAuthor[1], 0, -4);
+            }
+        }
+    }
+    
     public function curlWikiPageName()
     {
         $classNameAry = $this->curlWikiClassName();
@@ -292,6 +315,65 @@ class GoogleCodeCrawler extends WebCrawler
     {
         $this->curlIssuesTotal();  
         $classNameAry = $this->curlIssuesClassName();
+        $idExplodStr = 'vt id '.$classNameAry[0];
+        $statusExplodStr = 'vt '.$classNameAry[2];
+        $dataInterval = 99;
+        $status = array();
+        
+        for($i = 0; $i < $this->totalIssues; $i += $dataInterval)
+        {
+            $url = $this->baseIssueUrl ."&num=$dataInterval&start=$i";
+            curl_setopt($this->ch, CURLOPT_URL, $url);
+
+            $this->html = '';
+            $this->html = curl_exec($this->ch);
+            
+            $tmpID = explode($idExplodStr, $this->html);
+            $tmpStatus = explode($statusExplodStr, $this->html);
+           
+            $open = 0;
+            $close = 0;
+            for ($j = 1; $j <  count($tmpStatus); $j++) {
+            
+                $tmpIDAry = explode('</a>',$tmpID[$j]);
+                $tmpIDAry2 = explode('>',$tmpIDAry[0]);
+                
+                $this->getIssueDiscuss(trim($tmpIDAry2[2]));
+                
+                $tmpStatusAry = explode('</a>', $tmpStatus[$j]);
+                $tmpStatusAry2 = explode('>', $tmpStatusAry[0]);
+                $idx = count($status);
+                
+                if (! strcmp(trim($tmpStatusAry2[2]), "New")) {
+                    $statusStr = "open";
+                    ++$open;
+                } else {
+                    $statusStr = "close";
+                    ++$close;
+                }
+                
+                $status[] = trim($tmpStatusAry2[2]);
+                
+                unset($tmpIDAry);
+                unset($tmpIDAry2);
+                unset($tmpStatusAry);
+                unset($tmpStatusAry2);
+            }
+        }
+
+        $issue->topic = $this->totalIssues;
+        $issue->open = $open;
+        $issue->close = $close;
+        //TODO: total account and articles?
+        $issue->account = count($this->issueReplyAuthor);
+        $issue->article = $this->totalIssuesDiscuss;
+    }
+
+/*
+public function getIssue(Issue &$issue)
+    {
+        $this->curlIssuesTotal();  
+        $classNameAry = $this->curlIssuesClassName();
         $explodStr = 'vt '.$classNameAry[2];
         $dataInterval = 99;
         $status = array();
@@ -332,7 +414,9 @@ class GoogleCodeCrawler extends WebCrawler
         $issue->account = 0;
         $issue->article = 0;
     }
-
+*/
+    
+    
     public function curlDownloadName()
     {
         $classNameAry = $this->curlDownloadClassName();
