@@ -1,7 +1,7 @@
 <?php
+namespace wisecamera;
 
 require_once "DTO.php";
-//namespace wisecamera;
 
 use \PDO;
 
@@ -51,9 +51,10 @@ class SQLService
 
     public function insertIssue(Issue $issue)
     {
-        if ($this->lastData["issue_topic"] != $issue->topic or
-            $this->lastData["issue_post"] != $issue->article or
-            $this->lastData["issue_user"] != $issue->account) {
+        if ($this->lastData["issue_topic"] != $issue->topic
+            or $this->lastData["issue_post"] != $issue->article
+            or $this->lastData["issue_user"] != $issue->account
+        ) {
             $this->issueState = "success_update";
         }
 
