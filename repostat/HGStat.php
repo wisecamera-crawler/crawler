@@ -8,7 +8,7 @@ class HGStat extends RepoStat
     public function __construct($projectId, $url)
     {
         $this->projectId = $projectId;
-        if (is_dir("repo/$this->projectId")) {        
+        if (is_dir("repo/$this->projectId")) {
             exec("cd repo; cd $this->projectId; hg pull");
         } else {
             exec("cd repo; hg clone $url $this->projectId", $arr);
@@ -20,7 +20,7 @@ class HGStat extends RepoStat
         exec(
             "cd repo/$this->projectId;
              hg status --all | python ../../third/HGPlus/HGPlus.py",
-             $arr
+            $arr
         );
         $fileArr = explode(" ", $arr[3]);
         $lineArr = explode(" ", $arr[4]);
@@ -28,12 +28,12 @@ class HGStat extends RepoStat
 
         $vcs->file = (int) $fileArr[0];
         $vcs->line = (int) $lineArr[0];
-        $vcs->size = (double)$sizeArr[0] / 1024; 
+        $vcs->size = (double)$sizeArr[0] / 1024;
 
         exec(
             "cd repo/$this->projectId;
              hg log | python ../../third/HGPlus/HGPlusMore.py",
-             $this->tmpLogArr
+            $this->tmpLogArr
         );
         $userArr = explode(" ", $this->tmpLogArr[1]);
         $commitArr = explode(" ", $this->tmpLogArr[0]);

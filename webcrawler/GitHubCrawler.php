@@ -158,6 +158,11 @@ class GitHubCrawler extends WebCrawler
         $download = null;
     }
 
+    public function getRepoUrl($type)
+    {
+        return $this->baseUrl;
+    }
+
     private function fetchGitHubWikiUpdate($wikiName)
     {
         $url = $this->baseUrl . "/wiki/$wikiName/_history";

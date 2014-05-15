@@ -21,6 +21,9 @@ require_once "utility/WebUtility.php";
 require_once "utility/ParseUtility.php";
 require_once "repostat/RepoStat.php";
 require_once "repostat/GitStat.php";
+require_once "repostat/SVNStat.php";
+require_once "repostat/HGStat.php";
+require_once "repostat/CVSStat.php";
 require_once "webcrawler/SourceForgeCrawler.php";
 
 //WebUtility::useProxy(true);
@@ -65,10 +68,16 @@ $SQL->insertDownload($dlArray);
 
 //TODO stat factory
 $repoType = $SQL->getProjectInfo("vcs_type");
+$repoUrl = $webCrawler->getRepoUrl($repoType);
+echo $repoUrl . "\n";
 if ($repoType == "Git") {
-    $repoStat = new GitStat($id, $url);
+    $repoStat = new GitStat($id, $repoUrl);
 } elseif ($repoType == "SVN") {
-    $repoStat = new SVNStat($id, $url);
+    $repoStat = new SVNStat($id, $repoUrl);
+} elseif ($repoType == "HG") {
+    $repoStat = new HGStat($id, $repoUrl);
+} elseif ($repoType == "CVS") {
+    $repoStat = new CVSStat($id, $repoUrl);
 }
 
 $vcs = new VCS();

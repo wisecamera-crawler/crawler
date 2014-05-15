@@ -46,7 +46,6 @@ class SVNStat extends RepoStat
     {
         $authorAndCommit = $this->crawlAuthorAndCommit();
         $vcs->commit = $authorAndCommit["totalAuthors"];
-        //TODO file count
         $vcs->file = $this->getFileCount();
         $vcs->line = $this->crawlLine();
         $vcs->size = $this->crawlFilSize();

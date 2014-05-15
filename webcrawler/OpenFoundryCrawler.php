@@ -90,6 +90,24 @@ class OpenFoundryCrawler extends WebCrawler
             }
         }
     }
+    
+    public function getRepoUrl($type)
+    {
+        $content = WebUtility::getHtmlContent($this->baseUrl);
+        $htmlArr = explode("\n", $content);
+        for ($i = 0; $i < sizeof($htmlArr); ++$i) {
+            if ($htmlArr[$i] === "      <title>基本資料 ") {
+                $title = str_replace(" ", "", $htmlArr[$i+1]);
+                $title = substr($title, 1);
+                if ($type == "Git") {
+                    return "http://www.openfoundry.org/git/$title.git";
+                } elseif ($type == "SVN") {
+                    return "https://www.openfoundry.org/svn/$title";
+                }
+            }
+        }
+        return $this->baseUrl;
+    }
 
     private function getWikiPageLine($url)
     {

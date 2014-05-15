@@ -126,6 +126,12 @@ class SourceForgeCrawler extends WebCrawler
 	    $this->traverseDL($url,$DL_array[1], $download);
     }
 
+    public function getRepoUrl($type)
+    {
+        //TODO : get repo url
+        return $this->baseUrl;
+    }
+
     private function fetchSFWikiUpdate($PROJECT,$WIKINAME){		
     	$URL = "http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/history";
         $txt = WebUtility::getHtmlContent($URL);

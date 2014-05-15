@@ -21,7 +21,7 @@ class CVSStat extends RepoStat
         $userArr = explode(" ", $this->logArr[7]);
         $vcs->file = (int) $fileArr[0];
         $vcs->line = (int) $lineArr[0];
-        $vcs->size = (double)$sizeArr[0] / 1024; 
+        $vcs->size = (double)$sizeArr[0] / 1024;
         $vcs->user = (int)$userArr[0];
         
         //TODO

@@ -477,5 +477,10 @@ public function getIssue(Issue &$issue)
 
         return $dataAry;
     }
-
+    
+    public function getRepoUrl($type)
+    {
+        //TODO  get repo url
+        return $this->baseUrl;
+    }
 }

@@ -2,7 +2,7 @@
 namespace wisecamera;
 
 if ($argc != 2) {
-    echo "usage php main.php <project url>\n";
+    echo "usage php main.php <url>\n";
     exit(0);
 }
 
@@ -24,6 +24,8 @@ require_once "repostat/GitStat.php";
 require_once "webcrawler/SourceForgeCrawler.php";
 
 $webCrawler = WebCrawlerFactory::factory($url);
+
+echo "Repo : " . $webCrawler->getRepoUrl("SVN") . "\n";
 
 $issue = new Issue();
 $webCrawler->getIssue($issue);
