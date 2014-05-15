@@ -27,37 +27,36 @@ class GitHubCrawler extends WebCrawler
         $name = $tmp[3];
         $project = $tmp[4];
         preg_match_all(
-            '#<strong><a href="/'. $name. '/' . $project .'/wiki/.[^>]*>#i',
+            '/<td class="content">.*<\/td>/',
             $txt,
-            $authRandnumPic
+            $matches
         );
-
         $totalUpdate = 0;
         $totalLine = 0;
 
-        foreach ($authRandnumPic[0] as $value) {
+        foreach ($matches[0] as $match) {
             $wikiPage = new WikiPage();
 
-            $_array = explode("/", $value);
-            $wiki_page_name_array = explode("\"", $_array[4]);
-            $wikiPageName = $wiki_page_name_array[0];
-
-            $update = $this->fetchGitHubWikiUpdate($wikiPageName);
-            $line = $this->fetchGitHubWikiLineCount($wikiPageName);
+            $title = trim(strip_tags($match));
+            $pageUrl = str_replace(" ", "-", $title);
+            
+            $update = $this->fetchGitHubWikiUpdate($pageUrl);
+            $line = $this->fetchGitHubWikiLineCount($pageUrl);
 
             $totalUpdate += $update;
             $totalLine += $line;
 
-            $wikiPage->url = $this->baseUrl . "/wiki/$wikiPageName";
+            $wikiPage->url = $this->baseUrl . "/wiki/$pageUrl";
             $wikiPage->line = $line;
             $wikiPage->update = $update;
-            $wikiPage->title = $wikiPageName;
+            $wikiPage->title = $title;
             $wikiPageList []= $wikiPage;
         }
 
         $wiki->pages = sizeof($authRandnumPic[0]);
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
+
     }
 
     public function getRating(Rating & $rating)
@@ -167,9 +166,9 @@ class GitHubCrawler extends WebCrawler
     {
         $url = $this->baseUrl . "/wiki/$wikiName/_history";
         $txt = WebUtility::getHtmlContent($url);
-        preg_match_all('/<td[^>]*class="commit-name"[^>]*>(.*?) <\/td>/si', $txt, $updateTimes);
+        preg_match_all('/<tr>/', $txt, $updateTimes);
 
-        return sizeof($updateTimes[0]);
+        return sizeof($updateTimes[0])-1;
     }
 
     private function fetchGitHubWikiLineCount($wikiName)
