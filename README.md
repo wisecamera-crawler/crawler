@@ -11,12 +11,11 @@ crawler
 沒事不要測 很恐怖(誤
 
 ### 網頁爬蟲測試
-`php testCrawler.php <url>`
+`php testCrawler.php <url> [option]`
 
-* url 該專案之首頁，
-
-不用care是哪個網站，
-程式會自動處理
+* url 該專案之首頁，不用care是哪個網站，程式會自動處理
+* option 不輸入則分析所有指標，可以輸入IRDW分別代表Issue、Rank、Wiki、Download。
+ex. `php testCrawler.php <url> I` 就是只分析issue
 
 ### VCS爬蟲測試
 `php main.php <type> <id> <url>`
