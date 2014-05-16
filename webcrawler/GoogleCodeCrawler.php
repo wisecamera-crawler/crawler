@@ -369,54 +369,7 @@ class GoogleCodeCrawler extends WebCrawler
         $issue->article = $this->totalIssuesDiscuss;
     }
 
-/*
-public function getIssue(Issue &$issue)
-    {
-        $this->curlIssuesTotal();  
-        $classNameAry = $this->curlIssuesClassName();
-        $explodStr = 'vt '.$classNameAry[2];
-        $dataInterval = 99;
-        $status = array();
-        
-        for($i = 0; $i < $this->totalIssues; $i += $dataInterval)
-        {
-            $url = $this->baseIssueUrl ."&num=$dataInterval&start=$i";
-            curl_setopt($this->ch, CURLOPT_URL,   $url);
 
-            $this->html = '';
-            $this->html = curl_exec($this->ch);
-            
-            $tmpStatus = explode($explodStr, $this->html);
-           
-            $open = 0;
-            $close = 0;
-            for ($j = 1; $j <  count($tmpStatus); $j++) {
-                $tmp = explode('</a>', $tmpStatus[$j]);
-                $tmp2 = explode('>', $tmp[0]);
-                $idx = count($status);
-                
-                if(! strcmp(trim($tmp2[2]),"New")) {
-                    $statusStr = "open";
-                    ++$open;
-                } else {
-                    $statusStr = "close";
-                    ++$close;
-                }
-                
-                $status[] = trim($tmp2[2]);
-            }
-        }
-
-        $issue->topic = $this->totalIssues;
-        $issue->open = $open;
-        $issue->close = $close;
-        //TODO: total account and articles?
-        $issue->account = 0;
-        $issue->article = 0;
-    }
-*/
-    
-    
     public function curlDownloadName()
     {
         $classNameAry = $this->curlDownloadClassName();
@@ -480,7 +433,7 @@ public function getIssue(Issue &$issue)
     
     public function getRepoUrl($type)
     {
-        //TODO  get repo url
-        return $this->baseUrl;
+        $dataAry = $this->curlSourceClassName();
+        return $dataAr['cloneUrl'];
     }
 }
