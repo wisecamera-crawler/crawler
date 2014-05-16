@@ -435,7 +435,7 @@ class GoogleCodeCrawler extends WebCrawler
     {
         if ($type == 'SVN' || $type == 'Git') {
             $dataAry = $this->curlSourceClassName();
-            return $dataAr['cloneUrl'];
+            return $dataAry['cloneUrl'];
         } else {
             return 'none';
         }
