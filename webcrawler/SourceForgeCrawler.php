@@ -38,7 +38,7 @@ class SourceForgeCrawler extends WebCrawler
     {
         $this->baseUrl = $url;
         $arr = explode("/", $url);
-        $this->id = $arr[3];
+        $this->id = $arr[4];
     }
 
     /**
@@ -230,7 +230,7 @@ class SourceForgeCrawler extends WebCrawler
         $CodePage = WebUtility::getHtmlContent($url);
         preg_match_all('/<a href="#" class="btn" data-url="(.*)" title="Read Only">/', $CodePage, $Code_array);
         if (sizeof($Code_array[1])>0) {
-            $url_array=explode(" ",$Code_array[1][0]);
+            $url_array=explode(" ", $Code_array[1][0]);
             if (strcmp($type, $url_array[0])==0) {
                 $this->baseUrl=$url_array[2]." ".$url_array[3];
             }
