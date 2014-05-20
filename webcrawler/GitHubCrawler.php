@@ -1,15 +1,54 @@
 <?php
+/**
+ * GithubCrawler.php : Implementation for Github of WebCralwer
+ *
+ * PHP version 5
+ *
+ * LICENSE : none
+ *
+ * @dependency ../utility/DTO.php
+ *             WebCralwer.php
+ *             githubcrawler/GithubIssue.php
+ * @author   Poyu Chen <poyu677@gmail.com>
+ */
 namespace wisecamera;
 
+/**
+ * GithubCralwer
+ *
+ * WebCralwer implementation for Github
+ *
+ * @author   Poyu Chen <poyu677@gmail.com>
+ */
 class GitHubCrawler extends WebCrawler
 {
+    /**
+     * baseUrl  The main page url of the project
+     */
     private $baseUrl;
 
+    /**
+     * Constructor
+     *
+     * Record the input url as baseUrl
+     *
+     * @param string $url The URL
+     */
     public function __construct($url)
     {
         $this->baseUrl = $url;
     }
 
+    /**
+     * getIssue
+     *
+     * Function of WebCrawler.
+     * The work all done at GithubIssue (please refer to githubcrawler/GithubIssue.php)
+     *
+     * @param Issue $issue The issue DTO to fill info
+     *
+     * @return int Status code, 0 for OK
+     */
     public function getIssue(Issue & $issue)
     {
         $gi = new GitHubIssue($this->baseUrl . "/issues");
@@ -19,6 +58,19 @@ class GitHubCrawler extends WebCrawler
         $gi->traverseIssues($issue->article, $issue->account);
     }
 
+    /**
+     * getWiki
+     *
+     * Function of WebCrawler
+     * This function first get all wiki page from <base url>/wiki/_pages,
+     * then visit each page, record the page info and sum up.
+     *
+     * @param Wiki  $wiki         The wiki DTO to fill info
+     * @param array $wikiPageList Input should be an empty array,
+     *                            output should be list of WikiPage objects
+     *
+     * @return int Status code, 0 for OK
+     */
     public function getWiki(Wiki & $wiki, array & $wikiPageList)
     {
         $url = $this->baseUrl . "/wiki/_pages";
@@ -39,7 +91,7 @@ class GitHubCrawler extends WebCrawler
 
             $title = trim(strip_tags($match));
             $pageUrl = str_replace(" ", "-", $title);
-            
+
             $update = $this->fetchGitHubWikiUpdate($pageUrl);
             $line = $this->fetchGitHubWikiLineCount($pageUrl);
 
@@ -56,9 +108,19 @@ class GitHubCrawler extends WebCrawler
         $wiki->pages = sizeof($matches[0]);
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
-
     }
 
+    /**
+     * getRating
+     *
+     * Function of WebCrawler.
+     * Because to get star info, we need to login.
+     * First part is to login to Github, then get star, fork, and watch
+     *
+     * @param Rating $rating The rating DTO to fill info
+     *
+     * @return int Status code, 0 for OK
+     */
     public function getRating(Rating & $rating)
     {
         $tmp = explode("/", $this->baseUrl);
@@ -152,17 +214,46 @@ class GitHubCrawler extends WebCrawler
         $rating->fork = ParseUtility::intStrToInt($network_array[0]);
     }
 
+    /**
+     * getDownload
+     *
+     * Function of WebCrawler, Github has no such target.
+     *
+     * @param array $download List of Download data
+     *
+     * @return int Status code, 0 for OK
+     */
     public function getDownload(array & $downloads)
     {
         $download = null;
     }
 
+    /**
+     * getRepoUrl
+     *
+     * Function of WebCrawler.
+     * Github only have git, and its url is baseurl
+     *
+     * @param string $type The type of the VCS system (should noly be Git, SVN, HG, CVS)
+     * @param string $url  The clone url
+     *
+     * @return int Status code, 0 for OK
+     */
     public function getRepoUrl(&$type, &$url)
     {
         $type = "Git";
         $url =  $this->baseUrl;
     }
 
+    /**
+     * fetchGitHubWikiUpdate
+     *
+     * This function get update times of assigned wikipage
+     *
+     * @param string $wikiName The title of wiki page
+     *
+     * @return int Update times
+     */
     private function fetchGitHubWikiUpdate($wikiName)
     {
         $url = $this->baseUrl . "/wiki/$wikiName/_history";
@@ -172,6 +263,16 @@ class GitHubCrawler extends WebCrawler
         return sizeof($updateTimes[0])-1;
     }
 
+    /**
+     * fetchGitHubWikiLineCount
+     *
+     * Get assigned wiki page's line count.
+     * The information is caculated by third party utility
+     *
+     * @param string $wikiname The title of wiki page
+     *
+     * @return int Line counts of the page
+     */
     private function fetchGitHubWikiLineCount($wikiName)
     {
         $tmp = explode("/", $this->baseUrl);
