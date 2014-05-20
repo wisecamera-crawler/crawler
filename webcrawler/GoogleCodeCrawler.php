@@ -1,4 +1,15 @@
 <?php
+/**
+ * A crawler for GoogleCode
+ *
+ * PHP version 5
+ *
+ * LICENSE : none
+ *
+ * @category WebCrawler
+ * @package  Wisecamera
+ * @license  none <none>
+ */
 namespace wisecamera;
 
 class GoogleCodeCrawler extends WebCrawler
@@ -15,6 +26,16 @@ class GoogleCodeCrawler extends WebCrawler
     private $blockTagAry = array();
     private $issueReplyAuthor = array();
 
+    /**
+    *  初始化所有變數
+    *
+    *  $this->projectName : 欲爬的專題名稱
+    *  $this->baseUrl: 該專題名稱在google code的網址
+    *  $this->baseIssueUrl: 該專題的issues網址
+    *  $this->baseLoginUrl: 登入google的網址
+    *  $this->blockTagAry: 斷行html tag
+    *
+    **/
     public function __construct($url)
     {
         $arr = explode("/", $url);
@@ -34,6 +55,16 @@ class GoogleCodeCrawler extends WebCrawler
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
     }
 
+    /**
+    *   取得登入表格並回傳input 欄位
+    *
+    *   Argument:
+    *   $data: 某個form的html code
+    *
+    *   Return:
+    *   $inputs: 回傳該表單的input欄位
+    *
+    **/
     private function getFormFields($data)
     {
         if (preg_match('/(<form.*?id=.?gaia_loginform.*?<\/form>)/is', $data, $matches)) {
@@ -45,6 +76,16 @@ class GoogleCodeCrawler extends WebCrawler
         }
     }
 
+    /*
+    *   從某個表單取得input欄位
+    *
+    *   Argument:
+    *   $form: 某個表單的html code
+    *
+    *   Return:
+    *   $inputs: input欄位, 為一個陣列
+    *
+    **/
     private function getInputs($form)
     {
         $inputs = array();
@@ -71,6 +112,13 @@ class GoogleCodeCrawler extends WebCrawler
         return $inputs;
     }
 
+    /**
+    *   取得wiki page的css clase名稱
+    *
+    *   Return:
+    *   $tblTitleClass: 陣列, wiki page的class 名稱
+    *
+    **/
     private function curlWikiClassName()
     {
         $wikiUrl = $this->baseUrl . 'w/list?colspec=PageName+Summary+Changed+ChangedBy+RevNum+Stars';
@@ -92,6 +140,9 @@ class GoogleCodeCrawler extends WebCrawler
         return $tblTitleClass;
     }
 
+    /**
+    *   計算該專題的issue總數
+    **/    
     private function curlIssuesTotal()
     {
         curl_setopt($this->ch, CURLOPT_URL,   $this->baseIssueUrl);
@@ -104,6 +155,13 @@ class GoogleCodeCrawler extends WebCrawler
         $this->totalIssues = trim($tmp2[0]);
     }
     
+    /**
+    *   取得issue page的css clase名稱
+    *
+    *   Return:
+    *   $tblTitleClass: 陣列, issue page的class 名稱
+    *
+    **/
     private function curlIssuesClassName()
     {
         curl_setopt($this->ch, CURLOPT_URL, $this->baseIssueUrl);
@@ -124,6 +182,13 @@ class GoogleCodeCrawler extends WebCrawler
         return $tblTitleClass;
     }
 
+    /**
+    *   取得download page的css clase名稱
+    *
+    *   Return:
+    *   $tblTitleClass: 陣列, download page的class 名稱
+    *
+    **/
     private function curlDownloadClassName()
     {
         $downloadUrl = $this->baseUrl . 'downloads/list';
@@ -145,6 +210,15 @@ class GoogleCodeCrawler extends WebCrawler
         return $tblTitleClass;
     }
 
+    /**
+    *   取得source page的css clase名稱
+    *
+    *   Return:
+    *   $dataAry: 為一個二維陣列
+    *       -platForm:  該專題存放於哪個平台
+    *       -cloneUrl:  clone該專題的網址列
+    *
+    **/
     private function curlSourceClassName()
     {
         $sourceUrl = $this->baseUrl . 'source/checkout';
@@ -161,6 +235,9 @@ class GoogleCodeCrawler extends WebCrawler
         return $dataAry;
     }
 
+    /**
+    *   登入google
+    **/
     private function curlAutoLogin()
     {
         $COOKIEFILE = 'cookies.txt';
@@ -197,6 +274,16 @@ class GoogleCodeCrawler extends WebCrawler
         return $result;
     }
 
+    /**
+    *   計算特定wiki有幾行
+    *
+    *   Arguments:
+    *   $url:   特定wiki的網址
+    *
+    *   Return:
+    *   $totalLine: 該wiki有幾行
+    *
+    **/
     private function getWikiLine($url)
     {
         curl_setopt($this->ch, CURLOPT_URL, $url);
@@ -210,6 +297,7 @@ class GoogleCodeCrawler extends WebCrawler
         $tags = $dom->getElementsByTagName('*');
 
         $count_tag = array();
+        /*   count tags in this html page and how many times this tag shows up   */
         foreach ($tags as $tag) {
             $isTagExist = array_key_exists($tag->tagName, $count_tag);
             
@@ -221,7 +309,7 @@ class GoogleCodeCrawler extends WebCrawler
         }
 
         $totalLine = 0;
-
+        /*   compare tags in html is same as block tag   */
         foreach ($this->blockTagAry as $index => $blockTag) {
             foreach ($count_tag as $tag => $num) {
                 if(!strcmp($blockTag, $tag)) {
@@ -233,6 +321,13 @@ class GoogleCodeCrawler extends WebCrawler
         return $totalLine;
     }
 
+    /**
+    *   取得issue討論資訊，如作者、討論篇數
+    *
+    *   Argument:
+    *   $id:某篇issue編號
+    *
+    **/
     private function getIssueDiscuss($id)
     {
         $url = $this->baseUrl."issues/detail?id=$id&can=1";
@@ -254,6 +349,13 @@ class GoogleCodeCrawler extends WebCrawler
         }
     }
     
+    /*
+    *   取得該專題所有wiki名稱
+    *
+    *   Return:
+    *   $pageNames: 陣列, 該專題所有wiki名稱
+    *   
+    **/
     public function curlWikiPageName()
     {
         $classNameAry = $this->curlWikiClassName();
@@ -271,6 +373,14 @@ class GoogleCodeCrawler extends WebCrawler
         return $pageNames;
     }
 
+    /*
+    *   取得wiki所有相關資訊pages、status count 和update數
+    *
+    *   Arguments:
+    *   $wiki: wiki class
+    *   $wikiList:  wiki class array
+    *
+    */
     public function getWiki(Wiki &$wiki, array &$wikiList)
     {
         $pageName = $this->curlWikiPageName();
@@ -311,6 +421,13 @@ class GoogleCodeCrawler extends WebCrawler
         $wiki->update = $totalUpdate;
     }
 
+    /**
+    *   取得issue所有相關資訊topic、lines、account數 and article
+    *
+    *   Arguments:
+    *   $issue: issue class
+    *
+    */
     public function getIssue(Issue &$issue)
     {
         $this->curlIssuesTotal();  
@@ -369,7 +486,13 @@ class GoogleCodeCrawler extends WebCrawler
         $issue->article = $this->totalIssuesDiscuss;
     }
 
-
+    /**
+    *   取得該專題所有download名稱
+    *
+    *   Return:
+    *   $downloadName: 陣列, 該專題所有download名稱
+    *   
+    **/
     public function curlDownloadName()
     {
         $classNameAry = $this->curlDownloadClassName();
@@ -388,6 +511,13 @@ class GoogleCodeCrawler extends WebCrawler
         return $downloadName;
     }
 
+    /**
+    *   取得download名稱及位置
+    *   
+    *   Arguments:
+    *   $download: A downunit class array
+    *
+    **/
     public function getDownload(array &$donwload)
     {
         $downloadName = $this->curlDownloadName();
@@ -404,7 +534,7 @@ class GoogleCodeCrawler extends WebCrawler
             $idx = $i - 1;
             $url = $downloadDetailUrl.'name='.$downloadName[$idx];
 
-            $donwloadUnit = new Download();
+            $downloadUnit = new Download();
             $downloadUnit->name = $downloadName[$idx];
             $downloadUnit->url = $url;
             $downloadUnit->count = (int)trim($tmp2[2]);
@@ -415,6 +545,13 @@ class GoogleCodeCrawler extends WebCrawler
         }
     }
 
+    /**
+    *   取得使用者評分
+    *   
+    *   Arguments:
+    *   $rating: Rating class
+    *
+    **/
     public function getRating(Rating &$rating)
     {
         $html = $this->curlAutoLogin();
@@ -424,6 +561,9 @@ class GoogleCodeCrawler extends WebCrawler
         $rating->star = (int)$star[0];
     }
 
+    /*
+    * Get Source Information
+    **/
     public function curlSource()
     {
         $dataAry = $this->curlSourceClassName();
