@@ -1,4 +1,17 @@
 <?php
+/**
+ * main.php : the entry of cralwers
+ *
+ * usage php main.php <id>
+ * id : Project id in database
+ *
+ * PHP version 5
+ *
+ * LICENSE : none
+ *
+ * @author   Poyu Chen <poyu677@gmail.com>
+ */
+
 namespace wisecamera;
 
 if ($argc != 2) {
@@ -26,19 +39,23 @@ require_once "repostat/HGStat.php";
 require_once "repostat/CVSStat.php";
 require_once "webcrawler/SourceForgeCrawler.php";
 
-//WebUtility::useProxy(true);
-//$proxy = WebUtility::getProxy();
-
+//Set up DB info first
 SQLService::$ip = "127.0.0.1";
 SQLService::$user = "root";
 SQLService::$password = "openfoundry";
 
+//use proxy
+WebUtility::useProxy(true);
+$proxy = WebUtility::getProxy();
+
 $SQL = new SQLService($id);
 $url = $SQL->getProjectInfo("url");
 if ($url == null) {
+    echo "URL is null\n";
     return;
 }
 
+//analysis web pages
 $webCrawler = WebCrawlerFactory::factory($url);
 
 $issue = new Issue();
@@ -66,10 +83,9 @@ $dlArray = array();
 $webCrawler->getDownload($dlArray);
 $SQL->insertDownload($dlArray);
 
-//TODO stat factory
-$repoType = $SQL->getProjectInfo("vcs_type");
-$repoUrl = $webCrawler->getRepoUrl($repoType);
-echo $repoUrl . "\n";
+//analysis repos
+$webCrawler->getRepoUrl($repoType, $repoUrl);
+echo "$repoType : "  . $repoUrl . "\n";
 if ($repoType == "Git") {
     $repoStat = new GitStat($id, $repoUrl);
 } elseif ($repoType == "SVN") {

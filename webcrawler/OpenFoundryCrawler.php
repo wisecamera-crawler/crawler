@@ -93,17 +93,24 @@ class OpenFoundryCrawler extends WebCrawler
     
     public function getRepoUrl(&$type, &$url)
     {
-        $content = WebUtility::getHtmlContent($this->baseUrl);
+        $content = WebUtility::getHtmlContent($this->baseUrl . "/vcs_access");
         $htmlArr = explode("\n", $content);
+
+        $title = "";
         for ($i = 0; $i < sizeof($htmlArr); ++$i) {
-            if ($htmlArr[$i] === "      <title>基本資料 ") {
+            if ($htmlArr[$i] === "      <title>版本控制系統: 存取方式 ") {
                 $title = str_replace(" ", "", $htmlArr[$i+1]);
                 $title = substr($title, 1);
-                if ($type == "Git") {
-                    return "http://www.openfoundry.org/git/$title.git";
-                } elseif ($type == "SVN") {
-                    return "https://www.openfoundry.org/svn/$title";
-                }
+            }
+
+            if ($htmlArr[$i] === "      <h1>Git</h1>") {
+                $type = "Git";
+                $url = "http://www.openfoundry.org/git/$title.git";
+                return;
+            } elseif ($htmlArr[$i] === "      <h1>Subversion</h1>") {
+                $type = "SVN";
+                $url = "https://www.openfoundry.org/svn/$title";
+                return;
             }
         }
         return $this->baseUrl;
