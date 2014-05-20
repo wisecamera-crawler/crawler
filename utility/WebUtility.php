@@ -51,7 +51,7 @@ class WebUtility
      *
      * @return string $txt  The html content
      */
-    public static function getHtmlContent($url, $proxy=null)
+    public static function getHtmlContent($url, $proxy = null)
     {
         $ch = curl_init();
         $user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 " .
@@ -164,7 +164,7 @@ class WebUtility
      *
      * @return bool True for OK, false for bad connection
      */
-    private static function testConnection($proxy=null)
+    private static function testConnection($proxy = null)
     {
         $html = WebUtility::getHtmlContent("www.google.com", $proxy);
         if ($html == "") {

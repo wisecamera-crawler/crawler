@@ -1,8 +1,16 @@
 <?php
-
+/**
+ * DTO.php
+ *
+ * the include files for DTOs
+ * PHP version 5
+ *
+ * LICENSE : none
+ *
+ * @author Poyu Chen <poyu677@gmail.com>
+ */
 require_once 'DTOs/Wiki.php';
 require_once 'DTOs/WikiPage.php';
-require_once 'DTOs/Project.php';
 require_once 'DTOs/Issue.php';
 require_once 'DTOs/VCS.php';
 require_once 'DTOs/VCSCommiter.php';
