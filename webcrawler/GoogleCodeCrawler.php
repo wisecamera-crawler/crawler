@@ -571,7 +571,7 @@ class GoogleCodeCrawler extends WebCrawler
         return $dataAry;
     }
     
-    public function getRepoUrl($type)
+    public function getRepoUrl(&$type, &$url)
     {
         if ($type == 'SVN' || $type == 'Git') {
             $dataAry = $this->curlSourceClassName();

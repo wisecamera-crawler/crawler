@@ -91,7 +91,7 @@ class OpenFoundryCrawler extends WebCrawler
         }
     }
     
-    public function getRepoUrl($type)
+    public function getRepoUrl(&$type, &$url)
     {
         $content = WebUtility::getHtmlContent($this->baseUrl);
         $htmlArr = explode("\n", $content);

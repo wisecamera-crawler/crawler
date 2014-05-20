@@ -157,9 +157,10 @@ class GitHubCrawler extends WebCrawler
         $download = null;
     }
 
-    public function getRepoUrl($type)
+    public function getRepoUrl(&$type, &$url)
     {
-        return $this->baseUrl;
+        $type = "Git";
+        $url =  $this->baseUrl;
     }
 
     private function fetchGitHubWikiUpdate($wikiName)

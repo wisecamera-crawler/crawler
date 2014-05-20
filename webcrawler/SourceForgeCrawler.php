@@ -223,7 +223,7 @@ class SourceForgeCrawler extends WebCrawler
      * @version 1.0
      */
 
-    public function getRepoUrl($type)
+    public function getRepoUrl(&$type, &$url)
     {
         $url = "http://sourceforge.net/p/$this->id/code/";
         $this->baseUrl="none";
