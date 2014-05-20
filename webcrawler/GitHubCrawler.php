@@ -53,7 +53,7 @@ class GitHubCrawler extends WebCrawler
             $wikiPageList []= $wikiPage;
         }
 
-        $wiki->pages = sizeof($authRandnumPic[0]);
+        $wiki->pages = sizeof($matches[0]);
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
 
