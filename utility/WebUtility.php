@@ -58,6 +58,7 @@ class WebUtility
             "(KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19";
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
         if (WebUtility::$isUseProxy == true) {

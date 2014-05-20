@@ -225,17 +225,27 @@ class SourceForgeCrawler extends WebCrawler
 
     public function getRepoUrl(&$type, &$url)
     {
-        $url = "http://sourceforge.net/p/$this->id/code/";
-        $this->baseUrl="none";
-        $CodePage = WebUtility::getHtmlContent($url);
+        $Code_url = "http://sourceforge.net/p/$this->id/code/";
+        $CodePage = WebUtility::getHtmlContent($Code_url);
         preg_match_all('/<a href="#" class="btn" data-url="(.*)" title="Read Only">/', $CodePage, $Code_array);
         if (sizeof($Code_array[1])>0) {
             $url_array=explode(" ", $Code_array[1][0]);
-            if (strcmp($type, $url_array[0])==0) {
-                $this->baseUrl=$url_array[2]." ".$url_array[3];
+            $url=$url_array[2]." ".$url_array[3];
+            $Code_type=$url_array[0];
+            switch ($Code_type]) {
+                case "git":
+                    $type="Git";
+                    break;
+
+                case "svn":
+                    $type="SVN";
+                    break;
+
+                case "hg":
+                    $type="HG";
+                    break;
             }
         }
-        return $this->baseUrl;
     }
 
 
