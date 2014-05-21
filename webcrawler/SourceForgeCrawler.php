@@ -232,7 +232,7 @@ class SourceForgeCrawler extends WebCrawler
             $url_array=explode(" ", $Code_array[1][0]);
             $url=$url_array[2]." ".$url_array[3];
             $Code_type=$url_array[0];
-            switch ($Code_type]) {
+            switch ($Code_type) {
                 case "git":
                     $type="Git";
                     break;
