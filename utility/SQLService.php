@@ -352,6 +352,16 @@ class SQLService
         );
     }
 
+    public function insertVCSType($type)
+    {
+        $this->setupDBConnection();
+
+        $this->connection->query(
+            "UPDATE `project` 
+                SET `vcs_type` = '$type' 
+             WHERE `project`.`project_id` = '$this->projectId';"
+         );
+    }
     /**
      * getProjectInfo
      *

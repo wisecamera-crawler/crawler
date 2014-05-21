@@ -85,7 +85,10 @@ $SQL->insertDownload($dlArray);
 
 //analysis repos
 $webCrawler->getRepoUrl($repoType, $repoUrl);
+
 echo "$repoType : "  . $repoUrl . "\n";
+$SQL->insertVCSType($repoType);
+
 if ($repoType == "Git") {
     $repoStat = new GitStat($id, $repoUrl);
 } elseif ($repoType == "SVN") {
