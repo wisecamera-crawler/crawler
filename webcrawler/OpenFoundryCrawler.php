@@ -201,6 +201,11 @@ class OpenFoundryCrawler extends WebCrawler
                 $url = "https://www.openfoundry.org/svn/$title";
 
                 return;
+            } elseif ($htmlArr[$i] === "      <h1>匿名CVS存取</h1>") {
+                $type = "CVS";
+                $url = "ext:cvs@cvs.openfoundry.org:/cvs|$title";
+
+                return;
             }
         }
 

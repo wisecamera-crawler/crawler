@@ -31,15 +31,20 @@ class CVSStat extends RepoStat
      *
      * Call third party (refer to third/cvsPlus) method to analysis.
      * Then store the result in logArr
+     * Because cvs/cvsPlus need 2 parameter: url and dir(project) name, 
+     * url parameter use '|' to split.
+     *  ex. http://www.openfoundry.org/of/projects/159
+     *      It says through "cvs -d :ssh:cvs@cvs.openfoundry.org:/cvs co graveblogger" to get
+     *      Then we will get "ssh:cvs@cvs.openfoundry.org:/cvs|graveblogger"
      *
      * @param string $projectId Project id in our DB
      * @param string $url       Repo's clone url
      */
     public function __construct($projectId, $url)
     {
-        //TODO : gen cmd string
-        $cmdString = "pserver:anonymous@mx4j.cvs.sourceforge.net:/cvsroot/mx4j";
-        $module = "mx4j";
+        $splitToken = explode("|", $url);
+        $cmdString = splitToken[0];
+        $module = splitToken[1];
         exec("cd third/cvsPlus; ./perform.sh $cmdString $module", $this->logArr);
     }
 
