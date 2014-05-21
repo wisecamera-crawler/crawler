@@ -24,7 +24,7 @@ class SVNStat extends RepoStat
     private $logOutput;
     private $reverseFileSizeOutput;
     private $lineOutput;
-    
+
     /**
      *   當物件被宣告時，初始化各個資訊
      *
@@ -63,10 +63,10 @@ class SVNStat extends RepoStat
                 continue;
             }
 
-            if($line[0] == 'r') {
+            if ($line[0] == 'r') {
                 $arr = explode("|", $line);
                 $author = trim($arr[1]);
-                if(!isset($result[$author])) {
+                if (!isset($result[$author])) {
                     $result[$author] = array();
                     $result[$author]['M'] = 0;
                     $result[$author]['A'] = 0;
@@ -75,14 +75,14 @@ class SVNStat extends RepoStat
 
                 $i = $i + 2;
                 $line = $logArr[$i];
-                while($line != "") {
+                while ($line != "") {
                     ++$result[$author][$line[3]];
                     ++$i;
                     $line = $logArr[$i];
                 }
             }
         }
-        
+
         foreach ($result as $name => $c) {
             $commiter = new VCSCommiter();
             $commiter->commiter = $name;
@@ -110,30 +110,31 @@ class SVNStat extends RepoStat
         shell_exec('rm '.$this->outputFileName .'/'.$this->fileSizeOutput);
         shell_exec('find ./'.$this->outputFileName .' -name "*" -and -path "*.svn*" -prune -o -name "*" | xargs wc -l > '.$this->outputFileName .'/'.$this->lineOutput);
     }
-    
+
     /**
      *  分析專案Clone下來後檔案資料
-     *  
+     *
      *  @return $fileSize 該專案檔案大小
-    **/    
+    **/
     public function crawlFilSize()
     {
         $handleSize = fopen($this->outputFileName.'/'.$this->reverseFileSizeOutput, "r");
         if ($handleSize) {
             if (($str = fgets($handleSize, 4096)) !== false) {
-                
+
                 $tmpFileSize =  explode(" ", $str);
                 $fileSize = round(($tmpFileSize[0] / 1000), 2);
-                
+
                 fclose($handleSize);
+
                 return $fileSize;
             }
         }
     }
-    
+
     /**
      *  分析專案Clone下來後作者及commit資料
-     *  
+     *
      *  @return $dataAry 該專案共有幾位作者及總commit次數
     **/
     public function crawlAuthorAndCommit()
@@ -143,13 +144,13 @@ class SVNStat extends RepoStat
         $authorAry = array();
         $totalAuthor = 0;
         $dataAry = array();
-        
+
         $logAry = explode('------------------------------------------------------------------------', $fileContent);
-        
+
         for ($i  = 1; $i < count($logAry); $i++) {
             $isFindAuthor = false;
             $commitAuthorAry = explode('|', $logAry[$i]);
-            
+
             if (count($commitAuthorAry) > 2) {
                 for ($j = 0; $j < count($authorAry); $j++) {
                     if (!strcmp($commitAuthorAry[1], $authorAry[$j])) {
@@ -157,29 +158,30 @@ class SVNStat extends RepoStat
                         break;
                     }
                 }
-                
+
                 if (!$isFindAuthor) {
                     $authorAry[] = $commitAuthorAry[1];
                 }
             }
-        
+
             $commit = substr(trim($commitAuthorAry[0]), 1);
-            
+
             if ($commit > $maxCommit) {
                 $maxCommit = $commit;
             }
         }
-        
+
         $totalAuthor = count($authorAry);
         $dataAry  = array('totalAuthors' => $totalAuthor, 'totalCommit' => $maxCommit);
+
         return $dataAry;
     }
 
     /**
      *  分析專案Clone下來後檔案資料
-     *  
+     *
      *  @return $finalLine 該專案行數
-    **/    
+    **/
     public function crawlLine()
     {
         $handleLine = fopen($this->outputFileName.'/'.$this->lineOutput, "r");
@@ -191,7 +193,7 @@ class SVNStat extends RepoStat
                 $svnStr = '.svn';
                 $contents = fgets($handleLine, 1024);
                 $subStr = substr(trim($contents), -4);
-                
+
                 if (!strcmp($svnStr, $subStr)) {
                     preg_match('/\d+ ./', trim($contents), $matches);
                     if (count($matches) > 0) {
@@ -200,16 +202,17 @@ class SVNStat extends RepoStat
                     }
                 } else {
                     preg_match('/\d+ total/', trim($contents), $matches);
-                    
+
                     if (count($matches) > 0) {
                         $line = substr(trim($matches[0]), 0, -6);
                         $totalLine += $line;
                     }
                 }
             }
-            
+
             fclose($handleLine);
             $finalLine = $totalLine - $svnLine;
+
             return $finalLine;
         }
     }
@@ -234,15 +237,16 @@ class SVNStat extends RepoStat
                 $changeAry[$chageStr]++;
             }
         }
-        
+
         return $changeAry;
-        
+
     }
 
     private function getFileCount()
     {
         $result = exec("wc $this->outputFileName/$this->lineOutput");
         $arr = explode(" ", trim($result));
-        return (int)$arr[0] - 6;
+
+        return (int) $arr[0] - 6;
     }
 }
