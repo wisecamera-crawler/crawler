@@ -572,12 +572,21 @@ class GoogleCodeCrawler extends WebCrawler
 
     public function getRepoUrl(&$type, &$url)
     {
-        if ($type == 'SVN' || $type == 'Git') {
-            $dataAry = $this->curlSourceClassName();
-
-            return $dataAry['cloneUrl'];
-        } else {
-            return 'none';
+        $html = WebUtility::getHtmlContent(
+            $this->baseUrl . "source/checkout"
+        );
+        preg_match('/<tt id="checkoutcmd">.*<\/tt>/', $html, $matches);
+        $command =  strip_tags($matches[0]);
+        $splitCommand = explode(" ", $command);
+        if ($splitCommand[0] === "svn") {
+            $type = "SVN";
+            $url = $splitCommand[2];
+        } elseif ($splitCommand[0] === "git") {
+            $type = "Git";
+            $url = $splitCommand[2];
+        } elseif ($splitCommand[0] === "hg") {
+            $type = "HG";
+            $url = $splitCommand[2];
         }
     }
 }

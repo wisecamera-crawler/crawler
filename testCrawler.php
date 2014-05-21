@@ -29,6 +29,9 @@ require_once "webcrawler/SourceForgeCrawler.php";
 
 $webCrawler = WebCrawlerFactory::factory($url);
 
+$webCrawler->getRepoUrl($type, $url);
+echo "$type : $url\n";
+
 if (strpos($qString, "I") !== false) {
     $issue = new Issue();
     $webCrawler->getIssue($issue);
@@ -55,3 +58,4 @@ if (strpos($qString, "D") !== false) {
     $webCrawler->getDownload($dlArray);
     print_r($dlArray);
 }
+

@@ -43,8 +43,8 @@ class CVSStat extends RepoStat
     public function __construct($projectId, $url)
     {
         $splitToken = explode("|", $url);
-        $cmdString = splitToken[0];
-        $module = splitToken[1];
+        $cmdString = $splitToken[0];
+        $module = $splitToken[1];
         exec("cd third/cvsPlus; ./perform.sh $cmdString $module", $this->logArr);
     }
 
