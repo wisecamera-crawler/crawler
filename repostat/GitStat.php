@@ -1,9 +1,36 @@
 <?php
+/**
+ * GitStat.php : Implementation of RepoStat of git
+ *
+ * PHP version 5
+ *
+ * LICENSE : none
+ *
+ * @dependency ../utility/DTO.php
+ *             RepoStat.php
+ * @author   Poyu Chen <poyu677@gmail.com>
+ */
 namespace wisecamera;
 
+/**
+ * GitStat
+ *
+ * Implemenation of RepoStat of git
+ *
+ * @author   Poyu Chen <poyu677@gmail.com>
+ */
 class GitStat extends RepoStat
 {
-
+    /**
+     * Constructor
+     *
+     * Constructor first check if this repo has been checled out or not.
+     * If the repo has been checked out, than update the source,
+     * else clone the repo to local.
+     *
+     * @param string $projectId Project id in our DB
+     * @param string $url       Repo's clone url
+     */
     public function __construct($projectId, $url)
     {
         $this->projectId = $projectId;
@@ -14,6 +41,16 @@ class GitStat extends RepoStat
         }
     }
 
+    /**
+     * getSummary
+     *
+     * We use gitstats (http://gitstats.sourceforge.net/) to help analysis information.
+     * In this function, we use gitstats to gen report and parse out info we want
+     *
+     * @param VCS $vcs The VCS object to transfer info
+     *
+     * @return int Status code, 0 for OK
+     */
     public function getSummary(VCS & $vcs)
     {
         $path = "repostat/gitstat";
@@ -39,6 +76,16 @@ class GitStat extends RepoStat
         exec("rm test1 -rf");
     }
 
+    /**
+     * getDataByCommiters
+     *
+     * This function dump git log into temp file,
+     * then parse the information we want.
+     *
+     * @param array $commiters List of VCSCommmiter objects
+     *
+     * @return int Status code, 0 for OK
+     */
     public function getDataByCommiters(array & $commiters)
     {
         define("CREATE", "create");
@@ -46,7 +93,7 @@ class GitStat extends RepoStat
         define("MODIFY", "modify");
 
         exec(
-            "cd repo; cd $this->projectId; 
+            "cd repo; cd $this->projectId;
             git log --stat --summary  > ../../output.txt"
         );
         $file = 'output.txt';
