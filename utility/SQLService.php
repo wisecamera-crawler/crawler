@@ -360,7 +360,7 @@ class SQLService
             "UPDATE `project` 
                 SET `vcs_type` = '$type' 
              WHERE `project`.`project_id` = '$this->projectId';"
-         );
+        );
     }
     /**
      * getProjectInfo

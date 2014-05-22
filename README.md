@@ -1,6 +1,10 @@
 crawler
 =======
 
+### 使用前
+* 安裝 GitStats (參考 http://gitstats.sourceforge.net/ , 請直接從source make, apt-get版本沒跟上)
+* 匯入DB
+
 ### 主程式
 `php main.php <project-id>`
 
@@ -25,24 +29,9 @@ ex. `php testCrawler.php <url> I` 就是只分析issue
 會進行update，否則進行clone
 * url repo URL
 
-CVS G_G中
-
 ### TODO
 Important
-* GoogleCodeCrawler.php => getRepoUrl
-* SourceForgeCrawler.php => getRepoUrl
-* CVSStat.php => cmd String
-
-In Code
-* main.php://TODO stat factory
-* webcrawler/githubcrawler/GitHubIssue.php:            //TODO : getHTMLContent need to be able for redirection
-* webcrawler/SourceForgeCrawler.php:        //TODO  : modify to WebUtility
-* webcrawler/SourceForgeCrawler.php:        //TODO : get repo url
-* webcrawler/GoogleCodeCrawler.php:            //TODO update times
-* /webcrawler/GoogleCodeCrawler.php:        //TODO:  get repo url
-* repostat/CVSStat.php:        //TODO : gen cmd string
-* repostat/CVSStat.php:        //TODO
-* repostat/CVSStat.php:        //TODO deleted files
+* CVS 分析 : 目前對CVS repo沒法解析url 無法進行分析
 
 ERROR control
 * DB error
