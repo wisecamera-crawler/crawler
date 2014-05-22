@@ -119,6 +119,7 @@ def uniqueAddUOI_ForAdd(USER):
 
 def travelFOI():
    DB(DB_TAL,"ENTER travelAllFiles")   
+   commitCnt = 0
    #for filePath in FOI:
       #output = Popen(prepareFileQueryCMD(filePath), stdout=PIPE).communicate()[0]
       #print output
@@ -133,12 +134,14 @@ def travelFOI():
             if len(entryAry) > 9 :
                #print entryAry[5] #commiter               
                uniqueAddUOI_ForModify(entryAry[5].rstrip(';'))               
+               commitCnt+=1
             else:
                uniqueAddUOI_ForAdd(entryAry[5].rstrip(';'))               
+               commitCnt+=1
          elif entryAry[0] == 'cvs':
             DB(DB_TAL,line) #eat redundant line
             print 'doomed'
-
+   print "%d commit found" %(commitCnt)
    print "%d users found" %(len(UOI))
    print "===== User activity detail data ====="
    for user in UOI:

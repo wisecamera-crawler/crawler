@@ -2,7 +2,7 @@
 namespace wisecamera;
 
 if ($argc != 4) {
-    echo "usage php main.php <type> <id> <url>\n";
+    echo "usage php testStat.php <type> <id> <url>\n";
     exit(0);
 }
 

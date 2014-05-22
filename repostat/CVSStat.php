@@ -63,14 +63,13 @@ class CVSStat extends RepoStat
         $fileArr = explode(" ", $this->logArr[4]);
         $lineArr = explode(" ", $this->logArr[5]);
         $sizeArr = explode(" ", $this->logArr[6]);
-        $userArr = explode(" ", $this->logArr[7]);
+        $commitArr = explode(" ", $this->logArr[7]);
+        $userArr = explode(" ", $this->logArr[8]);
         $vcs->file = (int) $fileArr[0];
         $vcs->line = (int) $lineArr[0];
         $vcs->size = (double)$sizeArr[0] / 1024;
         $vcs->user = (int)$userArr[0];
-        
-        //TODO
-        $vcs->commit = 0;
+        $vcs->commit = (int) $commitArr[0];
     }
 
     /**
@@ -85,7 +84,7 @@ class CVSStat extends RepoStat
      */
     public function getDataByCommiters(array & $commiters)
     {
-        for ($i = 9; $i < sizeof($this->logArr) - 1; $i +=3) {
+        for ($i = 10; $i < sizeof($this->logArr) - 1; $i +=3) {
             $v = new VCSCommiter();
             $v->commiter = substr($this->logArr[$i], 0, -1);
             $arr = explode(" ", $this->logArr[$i+2]);
