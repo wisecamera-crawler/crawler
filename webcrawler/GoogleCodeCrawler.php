@@ -142,19 +142,19 @@ class GoogleCodeCrawler extends WebCrawler
 
     /**
     *   計算該專題的issue總數
-    **/
+    **/    
     private function curlIssuesTotal()
     {
-        curl_setopt($this->ch, CURLOPT_URL, $this->baseIssueUrl);
+        curl_setopt($this->ch, CURLOPT_URL,   $this->baseIssueUrl);
 
         $this->html = '';
         $this->html = curl_exec($this->ch);
         $firstCut = explode('1 - 100', $this->html);
-        $tmp = explode('of ', $firstCut[1]);
-        $tmp2 = explode('<a', $tmp[1]);
+        $tmp = explode('of ',$firstCut[1]);
+        $tmp2 = explode('<a',$tmp[1]);
         $this->totalIssues = trim($tmp2[0]);
     }
-
+    
     /**
     *   取得issue page的css clase名稱
     *
@@ -270,7 +270,7 @@ class GoogleCodeCrawler extends WebCrawler
 
         $result = curl_exec($this->ch);
         $finalResult = "";
-
+        
         return $result;
     }
 
@@ -300,8 +300,8 @@ class GoogleCodeCrawler extends WebCrawler
         /*   count tags in this html page and how many times this tag shows up   */
         foreach ($tags as $tag) {
             $isTagExist = array_key_exists($tag->tagName, $count_tag);
-
-            if ($isTagExist) {
+            
+            if($isTagExist) {
                 $count_tag[$tag->tagName] += 1;
             } else {
                 $count_tag[$tag->tagName] = 1;
@@ -312,7 +312,7 @@ class GoogleCodeCrawler extends WebCrawler
         /*   compare tags in html is same as block tag   */
         foreach ($this->blockTagAry as $index => $blockTag) {
             foreach ($count_tag as $tag => $num) {
-                if (!strcmp($blockTag, $tag)) {
+                if(!strcmp($blockTag, $tag)) {
                     $totalLine += $num;
                 }
             }
@@ -332,29 +332,29 @@ class GoogleCodeCrawler extends WebCrawler
     {
         $url = $this->baseUrl."issues/detail?id=$id&can=1";
         curl_setopt($this->ch, CURLOPT_URL, $url);
-
+        
         $html = curl_exec($this->ch);
-
+        
         $tmpReplyAry = explode('<span class="author">', $html);
-
+        
         $this->totalIssuesDiscuss += count($tmpReplyAry);
-
+        
         for ($i = 1; $i < count($tmpReplyAry); $i++) {
             $tmpReplyAuthor = explode('</a>', $tmpReplyAry[$i]);
             $replyAuthor = explode('>', $tmpReplyAuthor[1]);
-
+            
             if (!in_array(substr($replyAuthor[1], 0, -4), $this->issueReplyAuthor)) {
                 $this->issueReplyAuthor[] = substr($replyAuthor[1], 0, -4);
             }
         }
     }
-
+    
     /*
     *   取得該專題所有wiki名稱
     *
     *   Return:
     *   $pageNames: 陣列, 該專題所有wiki名稱
-    *
+    *   
     **/
     public function curlWikiPageName()
     {
@@ -415,7 +415,7 @@ class GoogleCodeCrawler extends WebCrawler
             unset($tmp);
             unset($revNum);
         }
-
+        
         $wiki->pages =  count($tmpRevNum);
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
@@ -430,36 +430,37 @@ class GoogleCodeCrawler extends WebCrawler
     */
     public function getIssue(Issue &$issue)
     {
-        $this->curlIssuesTotal();
+        $this->curlIssuesTotal();  
         $classNameAry = $this->curlIssuesClassName();
         $idExplodStr = 'vt id '.$classNameAry[0];
         $statusExplodStr = 'vt '.$classNameAry[2];
         $dataInterval = 99;
         $status = array();
-
-        for ($i = 0; $i < $this->totalIssues; $i += $dataInterval) {
+        
+        for($i = 0; $i < $this->totalIssues; $i += $dataInterval)
+        {
             $url = $this->baseIssueUrl ."&num=$dataInterval&start=$i";
             curl_setopt($this->ch, CURLOPT_URL, $url);
 
             $this->html = '';
             $this->html = curl_exec($this->ch);
-
+            
             $tmpID = explode($idExplodStr, $this->html);
             $tmpStatus = explode($statusExplodStr, $this->html);
-
+           
             $open = 0;
             $close = 0;
             for ($j = 1; $j <  count($tmpStatus); $j++) {
-
-                $tmpIDAry = explode('</a>', $tmpID[$j]);
-                $tmpIDAry2 = explode('>', $tmpIDAry[0]);
-
+            
+                $tmpIDAry = explode('</a>',$tmpID[$j]);
+                $tmpIDAry2 = explode('>',$tmpIDAry[0]);
+                
                 $this->getIssueDiscuss(trim($tmpIDAry2[2]));
-
+                
                 $tmpStatusAry = explode('</a>', $tmpStatus[$j]);
                 $tmpStatusAry2 = explode('>', $tmpStatusAry[0]);
                 $idx = count($status);
-
+                
                 if (! strcmp(trim($tmpStatusAry2[2]), "New")) {
                     $statusStr = "open";
                     ++$open;
@@ -467,9 +468,9 @@ class GoogleCodeCrawler extends WebCrawler
                     $statusStr = "close";
                     ++$close;
                 }
-
+                
                 $status[] = trim($tmpStatusAry2[2]);
-
+                
                 unset($tmpIDAry);
                 unset($tmpIDAry2);
                 unset($tmpStatusAry);
@@ -490,7 +491,7 @@ class GoogleCodeCrawler extends WebCrawler
     *
     *   Return:
     *   $downloadName: 陣列, 該專題所有download名稱
-    *
+    *   
     **/
     public function curlDownloadName()
     {
@@ -512,7 +513,7 @@ class GoogleCodeCrawler extends WebCrawler
 
     /**
     *   取得download名稱及位置
-    *
+    *   
     *   Arguments:
     *   $download: A downunit class array
     *
@@ -536,9 +537,9 @@ class GoogleCodeCrawler extends WebCrawler
             $downloadUnit = new Download();
             $downloadUnit->name = $downloadName[$idx];
             $downloadUnit->url = $url;
-            $downloadUnit->count = (int) trim($tmp2[2]);
-            $donwload []= $downloadUnit;
-
+            $downloadUnit->count = (int)trim($tmp2[2]);
+            $donwload []= $downloadUnit;  
+            
             unset($tmp);
             unset($tmp2);
         }
@@ -546,7 +547,7 @@ class GoogleCodeCrawler extends WebCrawler
 
     /**
     *   取得使用者評分
-    *
+    *   
     *   Arguments:
     *   $rating: Rating class
     *
@@ -557,7 +558,7 @@ class GoogleCodeCrawler extends WebCrawler
         $tmp = explode('<span id="star_count">', $html);
         $star =explode("<", $tmp[1]);
 
-        $rating->star = (int) $star[0];
+        $rating->star = (int)$star[0];
     }
 
     /*
@@ -569,24 +570,14 @@ class GoogleCodeCrawler extends WebCrawler
 
         return $dataAry;
     }
-
-    public function getRepoUrl(&$type, &$url)
+    
+    public function getRepoUrl(&$type,&$url)
     {
-        $html = WebUtility::getHtmlContent(
-            $this->baseUrl . "source/checkout"
-        );
-        preg_match('/<tt id="checkoutcmd">.*<\/tt>/', $html, $matches);
-        $command =  strip_tags($matches[0]);
-        $splitCommand = explode(" ", $command);
-        if ($splitCommand[0] === "svn") {
-            $type = "SVN";
-            $url = $splitCommand[2];
-        } elseif ($splitCommand[0] === "git") {
-            $type = "Git";
-            $url = $splitCommand[2];
-        } elseif ($splitCommand[0] === "hg") {
-            $type = "HG";
-            $url = $splitCommand[2];
+        if ($type == 'SVN' || $type == 'Git') {
+            $dataAry = $this->curlSourceClassName();
+            $url = $dataAry['cloneUrl'];
+        } else {
+            return 'none';
         }
     }
 }
