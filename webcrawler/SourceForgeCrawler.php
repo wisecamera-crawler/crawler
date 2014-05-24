@@ -233,7 +233,7 @@ class SourceForgeCrawler extends WebCrawler
 
         if (sizeof($Code_array[1])>0) {
             $url_array=explode(" ", $Code_array[1][0]);
-            $url=$url_array[2]." ".$url_array[3];
+            $url=$url_array[2];
             $Code_type=$url_array[0];
             switch ($Code_type) {
                 case "git":
