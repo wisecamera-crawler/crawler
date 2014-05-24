@@ -213,7 +213,8 @@ class SourceForgeCrawler extends WebCrawler
      * SourceForge repository url crawler
      *
      * This function access SourceForge website and get
-     * repository.
+     * repository. If get CVS url, it will do different 
+     * return contents.
      *
      * @param string $type   Project repository type
      *
@@ -228,6 +229,8 @@ class SourceForgeCrawler extends WebCrawler
         $Code_url = "http://sourceforge.net/p/$this->id/code/";
         $CodePage = WebUtility::getHtmlContent($Code_url);
         preg_match_all('/<a href="#" class="btn" data-url="(.*)" title="Read Only">/', $CodePage, $Code_array);
+        preg_match_all('/cvs -d:(pserver:\S*)  login <br\/>/', $CodePage, $CVS_array);
+
         if (sizeof($Code_array[1])>0) {
             $url_array=explode(" ", $Code_array[1][0]);
             $url=$url_array[2]." ".$url_array[3];
@@ -245,6 +248,9 @@ class SourceForgeCrawler extends WebCrawler
                     $type="HG";
                     break;
             }
+        } elseif (sizeof($CVS_array[1])>0) {
+            $url=$CVS_array[1][0]."|XXX";
+            $type="CVS";
         }
     }
 
