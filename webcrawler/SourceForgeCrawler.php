@@ -163,18 +163,18 @@ class SourceForgeCrawler extends WebCrawler
     {
         $URL = "http://sourceforge.net/projects/$this->id/reviews?source=navbar";
         $txt = WebUtility::getHtmlContent($URL);
-        preg_match('/<div class="stars-5" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank5);
-        preg_match('/<div class="stars-4" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank4);
-        preg_match('/<div class="stars-3" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank3);
-        preg_match('/<div class="stars-2" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank2);
-        preg_match('/<div class="stars-1" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank1);
-        $rank5[1]=str_replace(array("\r","\n","\t"," "), '', $rank5[1]);
-        $rank4[1]=str_replace(array("\r","\n","\t"," "), '', $rank4[1]);
-        $rank3[1]=str_replace(array("\r","\n","\t"," "), '', $rank3[1]);
-        $rank2[1]=str_replace(array("\r","\n","\t"," "), '', $rank2[1]);
-        $rank1[1]=str_replace(array("\r","\n","\t"," "), '', $rank1[1]);
-        
+        preg_match_all('/<div class="stars-5" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank5);
+        preg_match_all('/<div class="stars-4" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank4);
+        preg_match_all('/<div class="stars-3" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank3);
+        preg_match_all('/<div class="stars-2" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank2);
+        preg_match_all('/<div class="stars-1" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank1);
         if (sizeof($rank5[1])>0) {
+            $rank5[1]=str_replace(array("\r","\n","\t"," "), '', $rank5[1]);
+            $rank4[1]=str_replace(array("\r","\n","\t"," "), '', $rank4[1]);
+            $rank3[1]=str_replace(array("\r","\n","\t"," "), '', $rank3[1]);
+            $rank2[1]=str_replace(array("\r","\n","\t"," "), '', $rank2[1]);
+            $rank1[1]=str_replace(array("\r","\n","\t"," "), '', $rank1[1]);
+        
             $rating->fiveStar = $rank5[1];
             $rating->fourStar = $rank4[1];
             $rating->threeStar = $rank3[1];
