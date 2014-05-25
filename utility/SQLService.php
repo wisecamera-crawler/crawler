@@ -133,9 +133,9 @@ class SQLService
     {
         $this->setupDBConnection();
 
-        if ($this->lastData["issue_topic"] != $issue->topic
-            or $this->lastData["issue_post"] != $issue->article
-            or $this->lastData["issue_user"] != $issue->account
+        if ((int)$this->lastData["issue_topic"] != (int)$issue->topic
+            or (int)$this->lastData["issue_post"] != (int)$issue->article
+            or (int)$this->lastData["issue_user"] != (int)$issue->account
         ) {
             $this->issueState = "success_update";
         }
@@ -169,9 +169,9 @@ class SQLService
     {
         $this->setupDBConnection();
 
-        if ($this->lastData["wiki_pages"] != $wiki->pages or
-            $this->lastData["wiki_line"] != $wiki->line or
-            $this->lastData["wiki_update"] != $wiki->update) {
+        if ((int)$this->lastData["wiki_pages"] != (int)$wiki->pages or
+            (int)$this->lastData["wiki_line"] != (int)$wiki->line or
+            (int)$this->lastData["wiki_update"] != (int)$wiki->update) {
             $this->wikiState = "success_update";
         }
 
@@ -203,10 +203,18 @@ class SQLService
     {
         $this->setupDBConnection();
 
-        if ($this->lastData["vcs_commit"] != $vcs->commit or
-            $this->lastData["vcs_size"] != $vcs->size or
-            $this->lastData["vcs_line"] != $vcs->line or
-            $this->lastData["vcs_user"] != $vcs->user) {
+        if ((int)$this->lastData["vcs_commit"] != (int)$vcs->commit or
+            (string)$this->lastData["vcs_size"] != (string)$vcs->size or
+            (int)$this->lastData["vcs_line"] != (int)$vcs->line or
+            (int)$this->lastData["vcs_user"] != (int)$vcs->user or
+            (int)$this->lastData["vcs_file"] != (int)$vcs->file
+        ) {
+            echo (int)$this->lastData["vcs_commit"] != (int)$vcs->commit . "\n";
+            echo (double)$this->lastData["vcs_size"] != (double)$vcs->size . "\n";
+            echo (int)$this->lastData["vcs_line"] != (int)$vcs->line . "\n";
+            echo (int)$this->lastData["vcs_user"] != (int)$vcs->user . "\n";
+            echo (int)$this->lastData["vcs_file"] != (int)$vcs->file . "\n";
+    
                 $this->vcsState = "success_update";
         }
 
@@ -222,7 +230,8 @@ class SQLService
                 set `vcs_commit` = '$vcs->commit',
                     `vcs_size` = '$vcs->size',
                     `vcs_line` = '$vcs->line',
-                    `vcs_user` = '$vcs->user'
+                    `vcs_user` = '$vcs->user',
+                    `vcs_file` = '$vcs->file'
             WHERE `project_id` = '$this->projectId'"
         );
 
@@ -253,8 +262,8 @@ class SQLService
         }
         $valueString = substr($valueString, 0, -1);
 
-        if ($this->lastData["dl_file"] != $dlFile or
-            $this->lastData["dl_count"] != $dlCount) {
+        if ((int)$this->lastData["dl_file"] != (int)$dlFile or
+            (int)$this->lastData["dl_count"] != (int)$dlCount) {
             $this->downloadState = "success_update";
         }
 
