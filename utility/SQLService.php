@@ -239,7 +239,6 @@ class SQLService
                     `vcs_file` = '$vcs->file'
             WHERE `project_id` = '$this->projectId'"
         );
-
     }
 
     /**
@@ -409,7 +408,8 @@ class SQLService
     {
         $this->endTime = date("Y-m-d H:i:s");
         $this->setupDBConnection();
-
+        
+        $ip = $this->proxy;
         if ($type == "proxy") {
             $this->connection->query(
                 "INSERT INTO `crawl_status`
@@ -419,7 +419,16 @@ class SQLService
                         'cannot_get_data', 'cannot_get_data', 'cannot_get_data',
                         '', '$this->startTime', '$this->endTime')"
             );
+            $ip = "";
         }
+
+        $this->connection->query(
+            "UPDATE `project`
+                SET `status` = 'fail',
+                    `fail` = `fail` + 1,
+                    `proxy_ip` = ''
+            WHERE `project_id` = '$this->projectId'"
+        ); 
     }
     /**
      * writeSummary
@@ -459,6 +468,14 @@ class SQLService
                 VALUES('$this->projectId', '$status', '$this->wikiState', '$this->vcsState',
                 '$this->issueState', '$this->downloadState', '$ip',
                 '$this->startTime', '$this->endTime')"
+        );
+
+        $this->connection->query(
+            "UPDATE `project`
+                SET `status` = 'success',
+                    `success` = `success` + 1,
+                    `proxy_ip` = '$ip'
+            WHERE `project_id` = '$this->projectId'"
         );
     }
 
