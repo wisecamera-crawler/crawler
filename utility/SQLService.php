@@ -96,6 +96,12 @@ class SQLService
     {
         $this->setupDBConnection();
         $this->projectId = $projectId;
+        $this->startTime = date("Y-m-d H:i:s");
+        if ($proxy == "") {
+            $this->writeError("proxy");
+            return;
+        }
+        
         $this->wikiState = "no_change";
         $this->vcsState = "no_change";
         $this->issueState = "no_change";
@@ -105,7 +111,6 @@ class SQLService
         );
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $this->lastData = $result->fetch();
-        $this->startTime = date("Y-m-d H:i:s");
         $this->proxy = $proxy;
     }
 
@@ -361,6 +366,13 @@ class SQLService
         );
     }
 
+    /**
+     * insertVCSType
+     *
+     * update vcs type to project table
+     *
+     * @param string $type  Repo type: Git SVN HG CVS
+     */
     public function insertVCSType($type)
     {
         $this->setupDBConnection();
@@ -386,6 +398,29 @@ class SQLService
         return $this->lastData[$type];
     }
 
+    /**
+     * writeError
+     *
+     * If there is any error cause the progrm finish, call it
+     *
+     * @param string $type  Error type
+     */
+    private function writeError($type)
+    {
+        $this->endTime = date("Y-m-d H:i:s");
+        $this->setupDBConnection();
+
+        if ($type == "proxy") {
+            $this->connection->query(
+                "INSERT INTO `crawl_status`
+                    (`project_id`, `status`, `wiki`, `vcs`, `issue`,
+                    `download`, `proxy_ip`, `starttime`, `endtime`)
+                    VALUES('$this->projectId', 'no_proxy', 'cannot_get_data',
+                        'cannot_get_data', 'cannot_get_data', 'cannot_get_data',
+                        '', '$this->startTime', '$this->endTime')"
+            );
+        }
+    }
     /**
      * writeSummary
      *

@@ -48,7 +48,12 @@ SQLService::$password = "openfoundry";
 WebUtility::useProxy(true);
 $proxy = WebUtility::getProxy();
 
-$SQL = new SQLService($id);
+$SQL = new SQLService($id, $proxy);
+if ($proxy == "") {
+    echo "No Proxy\n";
+    return;
+}
+
 $url = $SQL->getProjectInfo("url");
 if ($url == null) {
     echo "URL is null\n";
