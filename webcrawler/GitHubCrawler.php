@@ -209,7 +209,7 @@ class GitHubCrawler extends WebCrawler
 
         $network_array=explode("<", $tmp[1]);
 
-        $rating->star = ParseUtility::intStrToInt($stargazers_array[12]);
+        $rating->star = ParseUtility::intStrToInt($stargazers_array[14]);
         $rating->watch = ParseUtility::intStrToInt($watchers_array[12]);
         $rating->fork = ParseUtility::intStrToInt($network_array[0]);
     }
