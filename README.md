@@ -12,8 +12,8 @@ crawler
 
 * project-id DB中專案之ID
 
+在使用前要先設定DB、路徑 (程式碼)
 會去對該專案的網頁及repo做分析並寫入資料庫
-
 
 ### 網頁爬蟲測試
 `php testCrawler.php <url> [option]`

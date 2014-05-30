@@ -21,6 +21,10 @@ if ($argc != 2) {
 
 $id = $argv[1];
 
+//first ensure at the working dicretory
+//Remember to modify to your own path
+chdir("/home/walter/crawler");
+
 require_once "utility/DTO.php";
 require_once "webcrawler/WebCrawler.php";
 require_once "webcrawler/githubcrawler/GitHubIssue.php";
@@ -43,6 +47,7 @@ require_once "webcrawler/SourceForgeCrawler.php";
 SQLService::$ip = "127.0.0.1";
 SQLService::$user = "root";
 SQLService::$password = "openfoundry";
+SQLService::$db = "NSC";
 
 //use proxy
 WebUtility::useProxy(true);

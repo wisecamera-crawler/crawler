@@ -38,11 +38,12 @@ class SQLService
      *  ip          ip of DB
      *  user        username of DB
      *  password    password of DB
+     *  db          DB name
      */
     public static $ip = "";
     public static $user = "";
     public static $password = "";
-
+    public static $db = "";
     /**
      * The DB connection object(PDO)
      */
@@ -486,7 +487,7 @@ class SQLService
      */
     private function setupDBConnection()
     {
-        $dsn = "mysql:host=" . SQLService::$ip . ";dbname=NSC";
+        $dsn = "mysql:host=" . SQLService::$ip . ";dbname=" . SQLService::$db;
         $this->connection = new PDO($dsn, SQLService::$user, SQLService::$password);
         $this->connection->query("SET CHARACTER SET utf8 ");
         $this->connection->query("SET NAMES utf8");
