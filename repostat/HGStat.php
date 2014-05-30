@@ -88,12 +88,12 @@ class HGStat extends RepoStat
      * @return int Status code, 0 for OK
      */
     public function getDataByCommiters(array & $commiters)
-    {   
+    {
         exec("cd repo/$this->projectId; hg log", $log);
         
         $userArr = array();
         for ($i = 0; $i < sizeof($log); ++$i) {
-            if(substr($log[$i], 0, 9) == "changeset") {
+            if (substr($log[$i], 0, 9) == "changeset") {
                 $ver = substr($log[$i], -12);
 
                 while (substr($log[$i], 0, 4) != "user") {

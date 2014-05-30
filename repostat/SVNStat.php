@@ -20,10 +20,7 @@ class SVNStat extends RepoStat
     private $projectName;
     private $dateTime;
     private $outputFileName;
-    private $fileSizeOutput;
     private $logOutput;
-    private $reverseFileSizeOutput;
-    private $lineOutput;
 
     /**
      *   當物件被宣告時，初始化各個資訊
@@ -32,13 +29,11 @@ class SVNStat extends RepoStat
     public function __construct($projectName, $cloneUrl)
     {
         $this->projectName = $projectName;
+        $this->projectId = $projectName;
         $this->dateTime = date('Ymd');
         $this->outputFileName = "repo/" . $this->projectName;
         $this->cloneUrl = $cloneUrl;
-        $this->fileSizeOutput = 'fileSize.txt';
         $this->logOutput = 'log.txt';
-        $this->reverseFileSizeOutput = 're_'.$this->fileSizeOutput;
-        $this->lineOutput = 'line.txt';
         $this->svnCloneProject();
     }
 
@@ -47,8 +42,8 @@ class SVNStat extends RepoStat
         $authorAndCommit = $this->crawlAuthorAndCommit();
         $vcs->commit = $authorAndCommit["totalAuthors"];
         $vcs->file = $this->getFileCount();
-        $vcs->line = $this->crawlLine();
-        $vcs->size = $this->crawlFilSize();
+        $vcs->line = $this->getTotalLine();
+        $vcs->size = $this->getSize();
         $vcs->user = $authorAndCommit["totalCommit"];
     }
 
@@ -104,32 +99,7 @@ class SVNStat extends RepoStat
         } else {
             shell_exec("cd $this->outputFileName; svn up");
         }
-        shell_exec('du '.$this->outputFileName .' > '.$this->outputFileName .'/'.$this->fileSizeOutput);
         shell_exec('svn log -v '.$this->outputFileName .' > '.$this->outputFileName .'/'.$this->logOutput);
-        shell_exec('tac '.$this->outputFileName .'/'.$this->fileSizeOutput.' > '.$this->outputFileName .'/'.$this->reverseFileSizeOutput);
-        shell_exec('rm '.$this->outputFileName .'/'.$this->fileSizeOutput);
-        shell_exec('find ./'.$this->outputFileName .' -name "*" -and -path "*.svn*" -prune -o -name "*" | xargs wc -l > '.$this->outputFileName .'/'.$this->lineOutput);
-    }
-
-    /**
-     *  分析專案Clone下來後檔案資料
-     *
-     *  @return $fileSize 該專案檔案大小
-    **/
-    public function crawlFilSize()
-    {
-        $handleSize = fopen($this->outputFileName.'/'.$this->reverseFileSizeOutput, "r");
-        if ($handleSize) {
-            if (($str = fgets($handleSize, 4096)) !== false) {
-
-                $tmpFileSize =  explode(" ", $str);
-                $fileSize = round(($tmpFileSize[0] / 1000), 2);
-
-                fclose($handleSize);
-
-                return $fileSize;
-            }
-        }
     }
 
     /**
@@ -178,46 +148,6 @@ class SVNStat extends RepoStat
     }
 
     /**
-     *  分析專案Clone下來後檔案資料
-     *
-     *  @return $finalLine 該專案行數
-    **/
-    public function crawlLine()
-    {
-        $handleLine = fopen($this->outputFileName.'/'.$this->lineOutput, "r");
-        $contents = '';
-        if ($handleLine) {
-            $totalLine = 0;
-            $svnLine = 0;
-            while (!feof($handleLine)) {
-                $svnStr = '.svn';
-                $contents = fgets($handleLine, 1024);
-                $subStr = substr(trim($contents), -4);
-
-                if (!strcmp($svnStr, $subStr)) {
-                    preg_match('/\d+ ./', trim($contents), $matches);
-                    if (count($matches) > 0) {
-                        $line = substr(trim($matches[0]), 0, -2);
-                        $svnLine += $line;
-                    }
-                } else {
-                    preg_match('/\d+ total/', trim($contents), $matches);
-
-                    if (count($matches) > 0) {
-                        $line = substr(trim($matches[0]), 0, -6);
-                        $totalLine += $line;
-                    }
-                }
-            }
-
-            fclose($handleLine);
-            $finalLine = $totalLine - $svnLine;
-
-            return $finalLine;
-        }
-    }
-
-    /**
      *  取得專案貢獻狀況資料
      *
      *
@@ -239,14 +169,5 @@ class SVNStat extends RepoStat
         }
 
         return $changeAry;
-
-    }
-
-    private function getFileCount()
-    {
-        $result = exec("wc $this->outputFileName/$this->lineOutput");
-        $arr = explode(" ", trim($result));
-
-        return (int) $arr[0] - 6;
     }
 }

@@ -123,7 +123,7 @@ abstract class RepoStat
      * And then use wc to get each file's line count
      *
      * @return int  File count of the repo
-     */ 
+     */
     protected function getTotalLine()
     {
         exec(
@@ -141,7 +141,6 @@ abstract class RepoStat
             $count += (int)$out[0];
             $arr = null;
         }
-
         return $count;
     }
 }
