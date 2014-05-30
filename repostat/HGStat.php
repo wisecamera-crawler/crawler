@@ -44,13 +44,14 @@ class HGStat extends RepoStat
         } else {
             exec("cd repo; hg clone $url $this->projectId", $arr);
         }
+        $this->getSize();
     }
 
     /**
      * getSummary
      *
-     * We use third party utility (refer to third/HGPlus) to help analysis information.
-     * In this function, we use HGPlus to gen report and parse out info we want
+     * This function get the summary of the repo.
+     * file, line, size use function inherit from RepoStat
      *
      * @param VCS $vcs The VCS object to transfer info
      *
@@ -58,50 +59,70 @@ class HGStat extends RepoStat
      */
     public function getSummary(VCS & $vcs)
     {
-        exec(
-            "cd repo/$this->projectId;
-             hg status --all | python ../../third/HGPlus/HGPlus.py",
-            $arr
-        );
-        $fileArr = explode(" ", $arr[3]);
-        $lineArr = explode(" ", $arr[4]);
-        $sizeArr = explode(" ", $arr[5]);
+        $vcs->file = $this->getFileCount();
+        $vcs->line = $this->getTotalLine();
+        $vcs->size = $this->getSize();
 
-        $vcs->file = (int) $fileArr[0];
-        $vcs->line = (int) $lineArr[0];
-        $vcs->size = (double) $sizeArr[0] / 1024;
-
-        exec(
-            "cd repo/$this->projectId;
-             hg log | python ../../third/HGPlus/HGPlusMore.py",
-            $this->tmpLogArr
-        );
-        $userArr = explode(" ", $this->tmpLogArr[1]);
-        $commitArr = explode(" ", $this->tmpLogArr[0]);
-        $vcs->user = (int) $userArr[0];
-        $vcs->commit = (int) $commitArr[0];
+        exec("cd repo/$this->projectId; hg log", $log);
+        $userArr = array();
+        $commit = 0;
+        foreach ($log as $line) {
+            if (substr($line, 0, 4) != "user") {
+                continue;
+            }
+            $user = substr($line, 12);
+            $userArr[$user] = 0;
+            ++$commit;
+        }
+        $vcs->user = sizeof($userArr);
+        $vcs->commit = $commit;
     }
 
     /**
      * getDataByCommiters
-     * The report of HGPlus is stored in tmpLogArr.
-     * In this function, we parse the info we wnt.
+     *
+     * We get the data by parse the hg log and each version's status
      *
      * @param array $commiters List of VCSCommmiter objects
      *
      * @return int Status code, 0 for OK
      */
     public function getDataByCommiters(array & $commiters)
-    {
-        for ($i = 3; $i < sizeof($this->tmpLogArr); $i +=4) {
+    {   
+        exec("cd repo/$this->projectId; hg log", $log);
+        
+        $userArr = array();
+        for ($i = 0; $i < sizeof($log); ++$i) {
+            if(substr($log[$i], 0, 9) == "changeset") {
+                $ver = substr($log[$i], -12);
+
+                while (substr($log[$i], 0, 4) != "user") {
+                    ++$i;
+                }
+                $user = substr($log[$i], 12);
+                if (!isset($userArr[$user])) {
+                    $userArr[$user] = array();
+                    $userArr[$user]["M"] = 0;
+                    $userArr[$user]["A"] = 0;
+                    $userArr[$user]["R"] = 0;
+                }
+
+                exec(
+                    "cd repo/$this->projectId; hg status --change $ver",
+                    $change
+                );
+                foreach ($change as $c) {
+                    $userArr[$user][$c[0]] += 1;
+                }
+            }
+        }
+    
+        foreach ($userArr as $name => $c) {
             $v = new VCSCommiter();
-            $v->commiter = substr($this->tmpLogArr[$i], 0, -1);
-            $arr = explode(" ", $this->tmpLogArr[$i+3]);
-            $v->modify = (int) $arr[0];
-            $arr = explode(" ", $this->tmpLogArr[$i+2]);
-            $v->delete = (int) $arr[0];
-            $arr = explode(" ", $this->tmpLogArr[$i+1]);
-            $v->new =  (int) $arr[0];
+            $v->commiter = $name;
+            $v->modify = $c["M"];
+            $v->delete = $c["R"];
+            $v->new = $c["A"];
             $commiters []= $v;
         }
     }

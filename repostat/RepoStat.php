@@ -64,4 +64,84 @@ abstract class RepoStat
      * @return int  Status code, 0 for OK
      */
     abstract public function getDataByCommiters(array & $commiters);
+
+    /**
+     * getSize
+     *
+     * Default function of RepoStat for get project's size
+     * Use 'du' to get file size
+     *
+     * @return int  Size of the repo
+     */
+    protected function getSize()
+    {
+        exec("du repo/$this->projectId", $output);
+        
+        $size = 0;
+        foreach ($output as $line) {
+            $explodeLine = explode("\t", $line);
+            
+            if ($explodeLine[1] == "repo/$this->projectId") {
+                $size += (int)$explodeLine[0];
+            } elseif (
+                $explodeLine[1] == "repo/$this->projectId/.git" or
+                $explodeLine[1] == "repo/$this->projectId/.svn" or
+                $explodeLine[1] == "repo/$this->projectId/.hg"
+            ) {
+                $size -= (int)$explodeLine[0];
+            }
+        }
+
+        return $size;
+    }
+
+    /**
+     * getFileCount
+     *
+     * Default function of RepoStat for get project's files
+     * Use 'find' to get filr list, and count the length of file list
+     *
+     * @return int  File count of the repo
+     */
+    protected function getFileCount()
+    {
+        exec(
+            "find ./repo/$this->projectId -name \"*\" " .
+            "-path \"*.hg\" -prune -o -name \"*\" " .
+            "-path \"*.svn\" -prune -o -name \"*\" " .
+            "-path \"*.git\" -prune -o -name \"*\"",
+            $fileList
+        );
+        return sizeof($fileList) - 1;
+    }
+
+    /**
+     * getTotalLine
+     *
+     * Default function of RepoStat for get project's total lines
+     * Use 'find' to get filr list, and count the length of file list
+     * And then use wc to get each file's line count
+     *
+     * @return int  File count of the repo
+     */ 
+    protected function getTotalLine()
+    {
+        exec(
+            "find ./repo/$this->projectId -name \"*\" " .
+            "-path \"*.hg\" -prune -o -name \"*\" " .
+            "-path \"*.svn\" -prune -o -name \"*\" " .
+            "-path \"*.git\" -prune -o -name \"*\"",
+            $fileList
+        );
+
+        $count = 0;
+        foreach ($fileList as $file) {
+            exec("wc -l $file", $arr);
+            $out = explode(" ", $arr[0]);
+            $count += (int)$out[0];
+            $arr = null;
+        }
+
+        return $count;
+    }
 }
