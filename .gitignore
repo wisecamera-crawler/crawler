@@ -1,3 +1,4 @@
 __*.php
 *.swp
 repo/*
+config.php
