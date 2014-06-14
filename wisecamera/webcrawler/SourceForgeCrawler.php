@@ -13,7 +13,15 @@
  * @version  GIT: <git_id>
  * @link     none
  */
+namespace wisecamera\webcrawler;
 
+use wisecamera\utility\DTOs\Download;
+use wisecamera\utility\DTOs\Issue;
+use wisecamera\utility\DTOs\Rating;
+use wisecamera\utility\DTOs\Wiki;
+use wisecamera\utility\DTOs\WikiPage;
+use wisecamera\utility\WebUtility;
+use wisecamera\utility\ParseUtility;
 
 /**
  * A crawler for Sourceforge.net
@@ -27,9 +35,6 @@
  * @version  Release: <package_version> 
  * @link     none
  */
-
-namespace wisecamera;
-
 class SourceForgeCrawler extends WebCrawler
 {
     private $id;

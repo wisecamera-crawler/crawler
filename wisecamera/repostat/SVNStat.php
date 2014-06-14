@@ -11,8 +11,10 @@
  * 4.crawlContribute()                  ---- 抓取該專案貢獻資訊
  *
 **/
+namespace wisecamera\repostat;
 
-namespace wisecamera;
+use wisecamera\utility\DTOs\VCS;
+use wisecamera\utility\DTOs\VCSCommiter;
 
 class SVNStat extends RepoStat
 {

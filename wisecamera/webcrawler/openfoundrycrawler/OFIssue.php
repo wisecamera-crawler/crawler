@@ -6,11 +6,12 @@
  *
  * LICENSE : none
  *
- * @dependency  ../utility/WebUtility.php
- *              ../utility/ParseUtility.php
  * @author   Poyu Chen <poyu677@gmail.com>
  */
-namespace wisecamera;
+namespace wisecamera\webcrawler\openfoundrycrawler;
+
+use wisecamera\utility\WebUtility;
+use wisecamera\utility\ParseUtility;
 
 /**
  * OFIssue

@@ -11,45 +11,55 @@
  *
  * @author   Poyu Chen <poyu677@gmail.com>
  */
-
 namespace wisecamera;
 
-require_once "config.php";
+require_once "third/SplClassLoader.php";
+$loader = new \SplClassLoader();
+$loader->register();
+
+use wisecamera\utility\Config;
+use wisecamera\utility\SQLService;
+use wisecamera\utility\WebUtility;
+use wisecamera\utility\ParseUtility;
+use wisecamera\utility\DTOs\Download;
+use wisecamera\utility\DTOs\Issue;
+use wisecamera\utility\DTOs\Rating;
+use wisecamera\utility\DTOs\VCS;
+use wisecamera\utility\DTOs\VCSCommiter;
+use wisecamera\utility\DTOs\Wiki;
+use wisecamera\utility\DTOs\WikiPage;
+use wisecamera\webcrawler\WebCrawler;
+use wisecamera\webcrawler\GitHubCrawler;
+use wisecamera\webcrawler\OpenFoundryCrawler;
+use wisecamera\webcrawler\WebCrawlerFactory;
+use wisecamera\webcrawler\GoogleCodeCrawler;
+use wisecamera\webcrawler\SourceForgeCrawler;
+use wisecamera\webcrawler\githubcrawler\GitHubIssue;
+use wisecamera\webcrawler\openfoundrycrawler\OFIssue;
+use wisecamera\repostat\GitStat;
+use wisecamera\repostat\SVNStat;
+use wisecamera\repostat\HGStat;
+use wisecamera\repostat\RepoStat;
+use wisecamera\repostat\CVSStat;
 
 if ($argc != 2) {
     echo "usage php main.php <project id>\n";
     exit(0);
 }
 
+
 $id = $argv[1];
 
+$config = new Config();
 //first ensure at the working dicretory
 //Remember to modify to your own path
-chdir($configPath);
-
-require_once "utility/DTO.php";
-require_once "webcrawler/WebCrawler.php";
-require_once "webcrawler/githubcrawler/GitHubIssue.php";
-require_once "webcrawler/openfoundrycrawler/OFIssue.php";
-require_once "webcrawler/GitHubCrawler.php";
-require_once "webcrawler/OpenFoundryCrawler.php";
-require_once "webcrawler/WebCrawlerFactory.php";
-require_once "webcrawler/GoogleCodeCrawler.php";
-require_once "utility/SQLService.php";
-require_once "utility/WebUtility.php";
-require_once "utility/ParseUtility.php";
-require_once "repostat/RepoStat.php";
-require_once "repostat/GitStat.php";
-require_once "repostat/SVNStat.php";
-require_once "repostat/HGStat.php";
-require_once "repostat/CVSStat.php";
-require_once "webcrawler/SourceForgeCrawler.php";
+chdir($config->getValue("crawlerPath"));
 
 //Set up DB info first
-SQLService::$ip = $configDBIp;
-SQLService::$user = $configDBUser;
-SQLService::$password = $configDBPassword;
-SQLService::$db = $configDBName;
+SQLService::$ip = $config->getValue("host");
+SQLService::$user = $config->getValue("user");
+SQLService::$password = $config->getValue("password");
+SQLService::$db = $config->getValue("dbname");
 
 //use proxy
 WebUtility::useProxy(true);

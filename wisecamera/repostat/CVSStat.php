@@ -6,11 +6,12 @@
  *
  * LICENSE : none
  *
- * @dependency ../utility/DTO.php
- *             RepoStat.php
  * @author   Poyu Chen <poyu677@gmail.com>
  */
-namespace wisecamera;
+namespace wisecamera\repostat;
+
+use wisecamera\utility\DTOs\VCS;
+use wisecamera\utility\DTOs\VCSCommiter;
 
 /**
  * CVSStat

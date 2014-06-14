@@ -9,7 +9,7 @@
  * @author   Poyu Chen <poyu677@gmail.com>
  */
 
-namespace wisecamera;
+namespace wisecamera\utility\DTOs;
 
 /**
  * Wiki 

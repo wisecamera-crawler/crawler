@@ -8,7 +8,7 @@
  *
  * @author   Poyu Chen <poyu677@gmail.com>
  */
-namespace wisecamera;
+namespace wisecamera\utility;
 
 /**
  * WebUtitlity provides the API for crawler to get html content.

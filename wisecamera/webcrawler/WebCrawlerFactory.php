@@ -13,7 +13,7 @@
  *
  * @author   Poyu Chen <poyu677@gmail.com>
  */
-namespace wisecamera;
+namespace wisecamera\webcrawler;
 
 /**
  * WebCrawlerFactory
@@ -36,11 +36,11 @@ class WebCrawlerFactory
     public static function factory($url)
     {
         if (strpos($url, "github") !== false) {
-            return new GithubCrawler($url);
+            return new GitHubCrawler($url);
         }
 
         if (strpos($url, "openfoundry") !== false) {
-            return new OpenfoundryCrawler($url);
+            return new OpenFoundryCrawler($url);
         }
 
         if (strpos($url, "sourceforge") !== false) {

@@ -9,12 +9,16 @@
  * @dependency DTO.php
  * @author   Poyu Chen <poyu677@gmail.com>
  */
-
-namespace wisecamera;
-
-//require_once "DTO.php";
+namespace wisecamera\utility;
 
 use \PDO;
+use wisecamera\utility\DTOs\Download;
+use wisecamera\utility\DTOs\Issue;
+use wisecamera\utility\DTOs\Rating;
+use wisecamera\utility\DTOs\VCS;
+use wisecamera\utility\DTOs\VCSCommiter;
+use wisecamera\utility\DTOs\Wiki;
+use wisecamera\utility\DTOs\WikiPage;
 
 /**
  * SQLService provides the APIs for crawler write data to db.
@@ -429,7 +433,7 @@ class SQLService
                     `fail` = `fail` + 1,
                     `proxy_ip` = ''
             WHERE `project_id` = '$this->projectId'"
-        ); 
+        );
     }
     /**
      * writeSummary

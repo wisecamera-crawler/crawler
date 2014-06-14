@@ -9,6 +9,8 @@
  *
  * @author Poyu Chen <poyu677@gmail.com>
  */
+namespace wisecamera\utility;
+
 require_once 'DTOs/Wiki.php';
 require_once 'DTOs/WikiPage.php';
 require_once 'DTOs/Issue.php';
