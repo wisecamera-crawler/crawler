@@ -14,7 +14,6 @@
 
 namespace wisecamera;
 
-require_once "config.php";
 
 if ($argc != 2) {
     echo "usage php main.php <project id>\n";
@@ -23,9 +22,11 @@ if ($argc != 2) {
 
 $id = $argv[1];
 
+require_once "utility/Config.php";
+$config = new Config();
 //first ensure at the working dicretory
 //Remember to modify to your own path
-chdir($configPath);
+chdir($config->getValue("crawlerPath"));
 
 require_once "utility/DTO.php";
 require_once "webcrawler/WebCrawler.php";
@@ -46,10 +47,10 @@ require_once "repostat/CVSStat.php";
 require_once "webcrawler/SourceForgeCrawler.php";
 
 //Set up DB info first
-SQLService::$ip = $configDBIp;
-SQLService::$user = $configDBUser;
-SQLService::$password = $configDBPassword;
-SQLService::$db = $configDBName;
+SQLService::$ip = $config->getValue("host");
+SQLService::$user = $config->getValue("user");
+SQLService::$password = $config->getValue("password");
+SQLService::$db = $config->getValue("dbname");
 
 //use proxy
 WebUtility::useProxy(true);
