@@ -15,14 +15,14 @@ crawler
 在使用前要先設定DB、路徑 (程式碼)
 會去對該專案的網頁及repo做分析並寫入資料庫
 
-### 網頁爬蟲測試
+### 網頁爬蟲測試 (目前不能使用)
 `php testCrawler.php <url> [option]`
 
 * url 該專案之首頁，不用care是哪個網站，程式會自動處理
 * option 不輸入則分析所有指標，可以輸入IRDW分別代表Issue、Rank、Wiki、Download。
 ex. `php testCrawler.php <url> I` 就是只分析issue
 
-### VCS爬蟲測試
+### VCS爬蟲測試 (目前不能使用)
 `php testStat.php <type> <id> <url>`
 
 * type repo之型態、包含Git SVN HG CVS (注意大小寫)
