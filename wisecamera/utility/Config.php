@@ -15,7 +15,7 @@ namespace wisecamera\utility;
  *
  * The class handle the config file.
  * On construction, it will read config file from assigned path.
- * (if not assigned, defult is ~/crawler_onf)
+ * (if not assigned, defult is ~/crawler_conf)
  * If config file is not exist, it will create one with default value.
  * After constrution, you can get the config value through 'getValue' function
  *

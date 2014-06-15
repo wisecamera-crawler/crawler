@@ -47,15 +47,15 @@ if ($argc != 2) {
     exit(0);
 }
 
-
 $id = $argv[1];
 
 $config = new Config();
+
 //first ensure at the working dicretory
 //Remember to modify to your own path
 chdir($config->getValue("crawlerPath"));
 
-//Set up DB info first
+//Set up DB info
 SQLService::$ip = $config->getValue("host");
 SQLService::$user = $config->getValue("user");
 SQLService::$password = $config->getValue("password");
@@ -80,30 +80,62 @@ if ($url == null) {
 //analysis web pages
 $webCrawler = WebCrawlerFactory::factory($url);
 
-$issue = new Issue();
-$webCrawler->getIssue($issue);
-echo "Issue:\n";
-print_r($issue);
-$SQL->insertIssue($issue);
+if (WebUtility::getErrCode() == 0) {
+    $issue = new Issue();
+    $webCrawler->getIssue($issue);
+    
+    if (WebUtility::getErrCode() != 0) {
+        $SQL->updateState("issue", "proxy_error");
+        $SQL->updateState("wiki", "proxy_error");
+        $SQL->updateState("download", "proxy_error");
+        echo "Connection seems had error when getting issue.\n";
+    } else {
+        echo "Issue:\n";
+        print_r($issue);
+        $SQL->insertIssue($issue);
+    }
+}
 
-$wiki = new Wiki();
-$wikiList = array();
-$webCrawler->getWiki($wiki, $wikiList);
-echo "Wiki:\n";
-print_r($wiki);
-print_r($wikiList);
-$SQL->insertWiki($wiki);
-$SQL->insertWikiPages($wikiList);
+if (WebUtility::getErrCode() == 0) {
+    $wiki = new Wiki();
+    $wikiList = array();
+    $webCrawler->getWiki($wiki, $wikiList);
+    
+    if (WebUtility::getErrCode() != 0) {
+        $SQL->updateState("wiki", "proxy_error");
+        $SQL->updateState("download", "proxy_error");
+        echo "Connection seems had error when getting wiki.\n";
+    } else {
+        echo "Wiki:\n";
+        print_r($wiki);
+        print_r($wikiList);
+        $SQL->insertWiki($wiki);
+        $SQL->insertWikiPages($wikiList);
+    }
+}
 
-$rank = new Rating();
-$webCrawler->getRating($rank);
-echo "rating:\n";
-print_r($rank);
-$SQL->insertRating($rank);
+if (WebUtility::getErrCode() == 0) {
+    $rank = new Rating();
+    $webCrawler->getRating($rank);
+    
+    echo "rating:\n";
+    print_r($rank);
+    $SQL->insertRating($rank);
+}
 
-$dlArray = array();
-$webCrawler->getDownload($dlArray);
-$SQL->insertDownload($dlArray);
+if (WebUtility::getErrCode() == 0) {
+    $dlArray = array();
+    $webCrawler->getDownload($dlArray);
+    
+    if (WebUtility::getErrCode() != 0) {
+        $SQL->updateState("download", "proxy_error");
+        echo "Connection seems had error when getting download.\n";
+    } else {
+        echo "download : \n";
+        print_r($dlArray);
+        $SQL->insertDownload($dlArray);
+    }
+}
 
 //analysis repos
 $webCrawler->getRepoUrl($repoType, $repoUrl);

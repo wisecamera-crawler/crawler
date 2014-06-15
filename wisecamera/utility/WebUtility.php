@@ -11,7 +11,7 @@
 namespace wisecamera\utility;
 
 /**
- * WebUtitlity provides the API for crawler to get html content.
+ * WebUtility provides the API for crawler to get html content.
  *
  * Ther are 2 public functions for crawler developers:
  *  getHtmlContent($url, $proxy)
@@ -40,6 +40,13 @@ class WebUtility
     private static $proxy = "";
 
     /**
+     * Error condition code
+     * 0 : OK
+     * 1 : connection error
+     */
+    private static $error = 0;
+
+    /**
      * getHtmlContent
      *
      * This function will return html content of assigned url
@@ -53,24 +60,27 @@ class WebUtility
      */
     public static function getHtmlContent($url, $proxy = null)
     {
-        $ch = curl_init();
-        $user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 " .
-            "(KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19";
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
-        if (WebUtility::$isUseProxy == true) {
-            curl_setopt($ch, CURLOPT_PROXY, WebUtility::$proxy);
+        if (WebUtility::$error !== 0) {
+            return "";
         }
-        if ($proxy !== null) {
-            curl_setopt($ch, CURLOPT_PROXY, $proxy);
+        $txt = WebUtility::connect($url, $proxy);
+        
+        if ($txt === null) {
+            if (WebUtility::testConnection($proxy) === false) {
+                WebUtility::$error = 1;
+            }
         }
-        $txt = curl_exec($ch);
-        curl_close($ch);
-
         return $txt;
+    }
+
+    /**
+     * getErrCode
+     *
+     * @return int  errCode
+     */
+    public static function getErrCode()
+    {
+        return WebUtility::$error;
     }
 
     /**
@@ -107,6 +117,46 @@ class WebUtility
     public static function getProxy()
     {
         return WebUtility::$proxy;
+    }
+
+    /**
+     * connect
+     *
+     * A function really do connection.
+     * Initailize the curl object and connect.
+     * If connection error, it will update the errCode.
+     *
+     * @param string $url   The assigned url
+     * @param string $proxy The assigned proxy, default is null.
+     *                      If not set, this class will use default setting.
+     *                      (depends on $isUseProxy variable)
+     *
+     * @return string $txt  The html content
+    */
+    private static function connect($url, $proxy = null)
+    {
+        $ch = curl_init();
+        $user_agent = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 " .
+            "(KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19";
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
+        if (WebUtility::$isUseProxy == true) {
+            curl_setopt($ch, CURLOPT_PROXY, WebUtility::$proxy);
+        }
+        if ($proxy !== null) {
+            curl_setopt($ch, CURLOPT_PROXY, $proxy);
+        }
+
+        $txt = curl_exec($ch);
+        if (curl_errno($ch)) {
+            return null;
+        }
+        curl_close($ch);
+
+        return $txt;
     }
 
     /**
@@ -167,8 +217,8 @@ class WebUtility
      */
     private static function testConnection($proxy = null)
     {
-        $html = WebUtility::getHtmlContent("www.google.com", $proxy);
-        if ($html == "") {
+        $html = WebUtility::connect("www.google.com", $proxy);
+        if ($html === null) {
             return false;
         }
         return true;

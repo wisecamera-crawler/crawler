@@ -127,7 +127,7 @@ class SQLService
     public function __destruct()
     {
         $this->endTime = date("Y-m-d H:i:s");
-        $this->writeSummaray();
+        $this->writeSummary();
     }
 
     /**
@@ -387,6 +387,41 @@ class SQLService
              WHERE `project`.`project_id` = '$this->projectId';"
         );
     }
+
+    /**
+     * updateState
+     *
+     * Provide method for update state outside.
+     * (Only use for proxy_error currently, 
+     *  but I think update from outside is not good idea, may have better method?)
+     * It will check if input is valid, if valid update directly.
+     *
+     * @param string $target    Which state var do you want to modify
+     * @param string $state     The state
+     *
+     */
+    public function updateState($target, $state)
+    {
+        $validTarget = array("wiki", "vcs", "issue", "download");
+        $validState = array(
+            "cannot_get_data",
+            "can_not_resolve",
+            "proxy_error",
+            "success_update",
+            "no_change"
+        );
+
+        if (
+            in_array($target, $validTarget) === false or
+            in_array($state, $validState) === false
+        ) {
+            return;
+        }
+
+        $varName = $target . "State";
+        $this->$varName = $state;
+    }
+
     /**
      * getProjectInfo
      *
@@ -442,7 +477,7 @@ class SQLService
      * In other words, write states of each target into DB (table crawl_status)
      * Automatically invoked on destruction
      */
-    private function writeSummaray()
+    private function writeSummary()
     {
         if ($this->lastData == null) {
             return;
@@ -452,7 +487,11 @@ class SQLService
 
         $arr = array($this->wikiState, $this->vcsState,
             $this->issueState, $this->downloadState);
-        if (in_array("cannot_get_data", $arr) or in_array("can_not_resolve", $arr)) {
+        if (
+            in_array("cannot_get_data", $arr) or
+            in_array("can_not_resolve", $arr) or
+            in_array("proxy_error", $arr)
+        ) {
             $status = "fail";
         } elseif (in_array("success_update", $arr)) {
             $status = "success_update";
@@ -475,10 +514,15 @@ class SQLService
                 '$this->startTime', '$this->endTime')"
         );
 
+        $result = "success";
+        if ($status === "fail") {
+            $result = "fail";
+        }
+
         $this->connection->query(
             "UPDATE `project`
-                SET `status` = 'success',
-                    `success` = `success` + 1,
+                SET `status` = '$result',
+                    `success` = `$result` + 1,
                     `proxy_ip` = '$ip'
             WHERE `project_id` = '$this->projectId'"
         );
