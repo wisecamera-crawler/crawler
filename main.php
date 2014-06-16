@@ -87,6 +87,7 @@ if (WebUtility::getErrCode() == 0) {
         $SQL->updateState("issue", "proxy_error");
         $SQL->updateState("wiki", "proxy_error");
         $SQL->updateState("download", "proxy_error");
+        $SQL->updateState("vcs", "proxy_error");
         echo "Connection seems had error when getting issue.\n";
     } else {
         echo "Issue:\n";
@@ -103,6 +104,7 @@ if (WebUtility::getErrCode() == 0) {
     if (WebUtility::getErrCode() != 0) {
         $SQL->updateState("wiki", "proxy_error");
         $SQL->updateState("download", "proxy_error");
+        $SQL->updateState("vcs", "proxy_error");
         echo "Connection seems had error when getting wiki.\n";
     } else {
         echo "Wiki:\n";
@@ -128,6 +130,7 @@ if (WebUtility::getErrCode() == 0) {
     
     if (WebUtility::getErrCode() != 0) {
         $SQL->updateState("download", "proxy_error");
+        $SQL->updateState("vcs", "proxy_error");
         echo "Connection seems had error when getting download.\n";
     } else {
         echo "download : \n";
@@ -137,27 +140,29 @@ if (WebUtility::getErrCode() == 0) {
 }
 
 //analysis repos
+if (WebUtility::getErrCode() == 0) {
 $webCrawler->getRepoUrl($repoType, $repoUrl);
 
-echo "$repoType : "  . $repoUrl . "\n";
-$SQL->insertVCSType($repoType);
+    echo "$repoType : "  . $repoUrl . "\n";
+    $SQL->insertVCSType($repoType);
 
-if ($repoType == "Git") {
-    $repoStat = new GitStat($id, $repoUrl);
-} elseif ($repoType == "SVN") {
-    $repoStat = new SVNStat($id, $repoUrl);
-} elseif ($repoType == "HG") {
-    $repoStat = new HGStat($id, $repoUrl);
-} elseif ($repoType == "CVS") {
-    $repoStat = new CVSStat($id, $repoUrl);
+    if ($repoType == "Git") {
+        $repoStat = new GitStat($id, $repoUrl);
+    } elseif ($repoType == "SVN") {
+        $repoStat = new SVNStat($id, $repoUrl);
+    } elseif ($repoType == "HG") {
+        $repoStat = new HGStat($id, $repoUrl);
+    } elseif ($repoType == "CVS") {
+        $repoStat = new CVSStat($id, $repoUrl);
+    }
+
+    $vcs = new VCS();
+    $repoStat->getSummary($vcs);
+    print_r($vcs);
+    $SQL->insertVCS($vcs);
+
+    $cList = array();
+    $repoStat->getDataByCommiters($cList);
+    print_r($cList);
+    $SQL->insertVCSCommiters($cList);
 }
-
-$vcs = new VCS();
-$repoStat->getSummary($vcs);
-print_r($vcs);
-$SQL->insertVCS($vcs);
-
-$cList = array();
-$repoStat->getDataByCommiters($cList);
-print_r($cList);
-$SQL->insertVCSCommiters($cList);
