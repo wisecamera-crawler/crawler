@@ -13,6 +13,9 @@
  */
 namespace wisecamera;
 
+//first, change to working drectory
+chdir(__DIR__);
+
 require_once "third/SplClassLoader.php";
 $loader = new \SplClassLoader();
 $loader->register();
@@ -50,10 +53,6 @@ if ($argc != 2) {
 $id = $argv[1];
 
 $config = new Config();
-
-//first ensure at the working dicretory
-//Remember to modify to your own path
-chdir($config->getValue("crawlerPath"));
 
 //Set up DB info
 SQLService::$ip = $config->getValue("host");
