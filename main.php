@@ -52,7 +52,12 @@ if ($argc != 2) {
 
 $id = $argv[1];
 
-$config = new Config();
+try {
+    $config = new Config();
+} catch (\Exception $e){
+    echo $e->getMessage() . "\n";
+    exit();
+}
 
 //Set up DB info
 SQLService::$ip = $config->getValue("host");

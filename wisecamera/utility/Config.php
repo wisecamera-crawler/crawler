@@ -41,14 +41,7 @@ class Config
     {
         $path = $confPath;
         if ($confPath == null) {
-            exec("env | grep 'HOME='", $homeOutput);
-            for ($i = 0; $i < count($homeOutput); $i++) {
-                $selfHome = explode("=", $homeOutput[$i]);
-                if ($selfHome[0] == 'HOME') {
-                    break;
-                }
-            }
-            $path = $selfHome[1] . "/crawler_conf";
+            $path = "../nsccrawler_conf";
         }
 
         $this->readConfig($path);
@@ -82,7 +75,7 @@ class Config
     private function readConfig($path)
     {
         if (!file_exists($path)) {
-            $this->makeDefualtConfig($path);
+            throw new \Exception("No configure file");
         }
 
         $fp = fopen($path, "r");
@@ -97,29 +90,5 @@ class Config
         }
 
         fclose($fp);
-    }
-    
-    /**
-     * makeDefualtConfig
-     *
-     * To generate config file with default value
-     *
-     * @param $defHome string   Path to config file
-     */
-    private function makeDefualtConfig($defHome)
-    {
-        $dataWrite[0] = "\$host = '127.0.0.1'";
-        $dataWrite[1] = "\$dbname = 'NSC'";
-        $dataWrite[2] = "\$user = 'root'";
-        $dataWrite[3] = "\$password = 'openfoundry'";
-        $dataWrite[4] = "\$chkAllTime = 10";
-        $dataWrite[5] = "\$chkProxyTime = 10";
-        $dataWrite[6] = "\$extraProgram = 'php ./crawler/main.php '";
-        $dataWrite[7] = "\$chkType = 'project'";
-        $dataWrite[8] = "\$chkTime = 240";
-
-        $fileOpen = fopen($defHome, "w");
-        fwrite($fileOpen, implode(chr(10), $dataWrite));
-        fclose($fileOpen);
     }
 }
