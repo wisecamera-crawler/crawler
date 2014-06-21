@@ -1,61 +1,80 @@
 <?php
+/**
+ * main.php : the entry of cralwers
+ *
+ * usage php main.php <id>
+ * id : Project id in database
+ *
+ * PHP version 5
+ *
+ * LICENSE : none
+ *
+ * @author   Poyu Chen <poyu677@gmail.com>
+ */
 namespace wisecamera;
 
-if ($argc < 2 or $argc > 3) {
-    echo "usage php main.php <url> [option]\n";
+//first, change to working drectory
+chdir(__DIR__);
+
+require_once "third/SplClassLoader.php";
+$loader = new \SplClassLoader();
+$loader->register();
+
+use wisecamera\utility\WebUtility;
+use wisecamera\utility\ParseUtility;
+use wisecamera\utility\DTOs\Download;
+use wisecamera\utility\DTOs\Issue;
+use wisecamera\utility\DTOs\Rating;
+use wisecamera\utility\DTOs\VCS;
+use wisecamera\utility\DTOs\VCSCommiter;
+use wisecamera\utility\DTOs\Wiki;
+use wisecamera\utility\DTOs\WikiPage;
+use wisecamera\webcrawler\WebCrawler;
+use wisecamera\webcrawler\GitHubCrawler;
+use wisecamera\webcrawler\OpenFoundryCrawler;
+use wisecamera\webcrawler\WebCrawlerFactory;
+use wisecamera\webcrawler\GoogleCodeCrawler;
+use wisecamera\webcrawler\SourceForgeCrawler;
+use wisecamera\webcrawler\githubcrawler\GitHubIssue;
+use wisecamera\webcrawler\openfoundrycrawler\OFIssue;
+
+if ($argc != 2) {
+    echo "usage php main.php <url>\n";
     exit(0);
 }
 
-$url = $argv[1];
-if ($argc == 3) {
-    $qString = strtoupper($argv[2]);
-} else {
-    $qString = "IWRD";
-}
-require_once "utility/DTO.php";
-require_once "webcrawler/WebCrawler.php";
-require_once "webcrawler/githubcrawler/GitHubIssue.php";
-require_once "webcrawler/openfoundrycrawler/OFIssue.php";
-require_once "webcrawler/GitHubCrawler.php";
-require_once "webcrawler/OpenFoundryCrawler.php";
-require_once "webcrawler/WebCrawlerFactory.php";
-require_once "webcrawler/GoogleCodeCrawler.php";
-require_once "utility/SQLService.php";
-require_once "utility/WebUtility.php";
-require_once "utility/ParseUtility.php";
-require_once "repostat/RepoStat.php";
-require_once "repostat/GitStat.php";
-require_once "webcrawler/SourceForgeCrawler.php";
+$webCrawler = WebCrawlerFactory::factory($argv[1]);
 
-$webCrawler = WebCrawlerFactory::factory($url);
-
-$webCrawler->getRepoUrl($type, $url);
-echo "$type : $url\n";
-
-if (strpos($qString, "I") !== false) {
+if (WebUtility::getErrCode() == 0) {
     $issue = new Issue();
     $webCrawler->getIssue($issue);
+    
     echo "Issue:\n";
     print_r($issue);
 }
-if (strpos($qString, "W") !== false) {
+
+if (WebUtility::getErrCode() == 0) {
     $wiki = new Wiki();
     $wikiList = array();
     $webCrawler->getWiki($wiki, $wikiList);
+    
     echo "Wiki:\n";
     print_r($wiki);
     print_r($wikiList);
 }
-if (strpos($qString, "R") !== false) {
+
+if (WebUtility::getErrCode() == 0) {
     $rank = new Rating();
     $webCrawler->getRating($rank);
+    
     echo "rating:\n";
     print_r($rank);
 }
-if (strpos($qString, "D") !== false) {
+
+if (WebUtility::getErrCode() == 0) {
     $dlArray = array();
-    echo "Download:\n";
     $webCrawler->getDownload($dlArray);
+    
+    echo "download : \n";
     print_r($dlArray);
 }
-
