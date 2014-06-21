@@ -181,20 +181,23 @@ class SQLService
 
         if ((int)$this->lastData["wiki_pages"] != (int)$wiki->pages or
             (int)$this->lastData["wiki_line"] != (int)$wiki->line or
+            (int)$this->lastData["wiki_word"] != (int)$wiki->word or
             (int)$this->lastData["wiki_update"] != (int)$wiki->update) {
             $this->wikiState = "success_update";
         }
 
         $this->connection->query(
-            "INSERT INTO `wiki` (`project_id`, `pages`, `line`, `update`)
-                VALUES('$this->projectId', '$wiki->pages', '$wiki->line', '$wiki->update')"
+            "INSERT INTO `wiki` (`project_id`, `pages`, `line`, `word`, `update`)
+                VALUES('$this->projectId', '$wiki->pages', '$wiki->line', 
+                       '$wiki->word','$wiki->update')"
         );
 
         $this->connection->query(
             "UPDATE `project`
                 set `wiki_pages` = '$wiki->pages',
                     `wiki_line` = '$wiki->line',
-                    `wiki_update` = '$wiki->update'
+                    `wiki_update` = '$wiki->update',
+                    `wiki_word` = '$wiki->word'
             WHERE `project_id` = '$this->projectId'"
         );
 
@@ -333,13 +336,13 @@ class SQLService
         $valueString = "VALUES";
         foreach ($pages as $page) {
             $valueString .= "('$page->url', '$this->projectId', '$page->title',
-                '$page->line', '$page->update'),";
+                '$page->line', '$page->word', '$page->update'),";
         }
         $valueString = substr($valueString, 0, -1);
 
         $this->connection->query(
             "INSERT INTO `wiki_page`
-                (`url`, `project_id`, `title`, `line`, `update`) $valueString"
+                (`url`, `project_id`, `title`, `line`, `word`, `update`) $valueString"
         );
     }
 

@@ -14,11 +14,12 @@ namespace wisecamera\utility\DTOs;
  * Wiki 
  *
  * Refer to DB `wiki` table
- * +---------+------------+-------+------+--------+-----------+
- * | wiki_id | project_id | pages | line | update | timestamp |
- * +---------+------------+-------+------+--------+-----------+
- *                          ^^^^^   ^^^^   ^^^^^^
+ * +---------+------------+-------+------+-----+--------+-----------+
+ * | wiki_id | project_id | pages | word |line | update | timestamp |
+ * +---------+------------+-------+------+-----+--------+-----------+
+ *                          ^^^^^   ^^^^  ^^^^   ^^^^^^
  * pages    Total pages
+ * count    Total words counts
  * line     Total lines
  * update   Total updates
  *
@@ -28,5 +29,6 @@ class Wiki
 {
     public $pages = 0;
     public $line = 0;
+    public $word = 0;
     public $update = 0;
 }

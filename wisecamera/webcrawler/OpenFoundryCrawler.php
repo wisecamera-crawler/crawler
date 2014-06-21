@@ -20,6 +20,7 @@ use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
 use wisecamera\utility\WebUtility;
 use wisecamera\utility\ParseUtility;
+use wisecamera\utility\WordCountHelper;
 use wisecamera\webcrawler\openfoundrycrawler\OFIssue;
 
 /**
@@ -104,6 +105,7 @@ class OpenFoundryCrawler extends WebCrawler
 
         $update = 0;
         $line = 0;
+        $word = 0;
         while (
             isset($htmlArr[$pos]) and
             $htmlArr[$pos+2] !== "  </table>"
@@ -116,8 +118,11 @@ class OpenFoundryCrawler extends WebCrawler
             $wikiPage->url = "https://www.openfoundry.org" . $arr[1];
             $wikiPage->update = (int) trim(strip_tags($htmlArr[$pos+3]));
             $update += $wikiPage->update;
-            $wikiPage->line = $this->getWikiPageLine($wikiPage->url);
+            $content = $this->getWikiContent($wikiPage->url);
+            $wikiPage->line = WordCountHelper::lineCount($content);
+            $wikiPage->word = WordCountHelper::utf8WordsCount($content);
             $line += $wikiPage->line;
+            $word += $wikiPage->word;
 
             $wikiPageList []= $wikiPage;
 
@@ -128,6 +133,7 @@ class OpenFoundryCrawler extends WebCrawler
         $wiki->pages = sizeof($wikiPageList);
         $wiki->update = $update;
         $wiki->line = $line;
+        $wiki->word = $word;
     }
 
     /**
@@ -222,27 +228,19 @@ class OpenFoundryCrawler extends WebCrawler
     }
 
     /**
-     * getWikiPageLine
+     * getWikiContent
      *
-     * The function to get wiki page's line count
+     * The function to extract wiki's content from wiki page
      *
      * @param string $url Assigned page's url
      *
-     * @return int Line count of the page
+     * @return string Wiki's content
      */
-    private function getWikiPageLine($url)
+    private function getWikiContent($url)
     {
         $content = WebUtility::getHtmlContent($url);
         preg_match("/<hr\/>.*<hr\/>/s", $content, $matches);
-        $htmlArr = explode("\n", $matches[0]);
-        $lineCount = 0;
-        foreach ($htmlArr as $line) {
-            $line = trim(strip_tags($line));
-            if (strlen($line) != 0) {
-                ++$lineCount;
-            }
-        }
 
-        return $lineCount;
+        return substr($matches[0], 0, -20);
     }
 }

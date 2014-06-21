@@ -19,6 +19,7 @@ use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
 use wisecamera\utility\WebUtility;
 use wisecamera\utility\ParseUtility;
+use wisecamera\utility\WordCountHelper;
 
 class GoogleCodeCrawler extends WebCrawler
 {
@@ -283,50 +284,21 @@ class GoogleCodeCrawler extends WebCrawler
     }
 
     /**
-    *   計算特定wiki有幾行
-    *
-    *   Arguments:
-    *   $url:   特定wiki的網址
-    *
-    *   Return:
-    *   $totalLine: 該wiki有幾行
-    *
-    **/
-    private function getWikiLine($url)
+     * getWikiContent
+     *
+     * The function to extract wiki's content from wiki page
+     *
+     * @param string $url Assigned page's url
+     *
+     * @return string Wiki's content
+     */
+    private function getWikiContent($url)
     {
         curl_setopt($this->ch, CURLOPT_URL, $url);
         $html = curl_exec($this->ch);
         $tmp = explode("id=\"wikimaincol\"", $html);
         $tmp2 = explode("</div>", $tmp[1]);
-
-        libxml_use_internal_errors(true);
-        $dom = new \DOMDocument;
-        $dom->loadHTML($tmp2[0]);
-        $tags = $dom->getElementsByTagName('*');
-
-        $count_tag = array();
-        /*   count tags in this html page and how many times this tag shows up   */
-        foreach ($tags as $tag) {
-            $isTagExist = array_key_exists($tag->tagName, $count_tag);
-
-            if ($isTagExist) {
-                $count_tag[$tag->tagName] += 1;
-            } else {
-                $count_tag[$tag->tagName] = 1;
-            }
-        }
-
-        $totalLine = 0;
-        /*   compare tags in html is same as block tag   */
-        foreach ($this->blockTagAry as $index => $blockTag) {
-            foreach ($count_tag as $tag => $num) {
-                if (!strcmp($blockTag, $tag)) {
-                    $totalLine += $num;
-                }
-            }
-        }
-
-        return $totalLine;
+        return $tmp2[0];
     }
 
     /**
@@ -399,6 +371,7 @@ class GoogleCodeCrawler extends WebCrawler
 
         $totalUpdate = 0;
         $totalLine = 0;
+        $totalWord = 0;
         for ($i = 1; $i <  count($tmpRevNum); $i++) {
             $tmp = explode('</a>', $tmpRevNum[$i]);
             $revNum = explode('>', $tmp[0]);
@@ -406,18 +379,16 @@ class GoogleCodeCrawler extends WebCrawler
             $idx = $i - 1;
 
             $url = $this->baseUrl.'wiki/'.$pageName[$idx];
-            $line = $this->getWikiLine($url);
-
+            $content = $this->getWikiContent($url);
+         
             $wikiPage = new WikiPage();
             $wikiPage->url = $url;
-            $wikiPage->line = $line;
             $wikiPage->title = $pageName[$idx];
-            //TODO update times
             $wikiPage->update = 0;
-
-            $totalUpdate += $wikiPage->update;
+            $wikiPage->line = WordCountHelper::lineCount($content);
+            $wikiPage->word = WordCountHelper::utf8WordsCount($content);
+            $totalWord += $wikiPage->word;
             $totalLine += $wikiPage->line;
-
             $wikiList []= $wikiPage;
 
             unset($tmp);
@@ -427,6 +398,7 @@ class GoogleCodeCrawler extends WebCrawler
         $wiki->pages =  count($tmpRevNum);
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
+        $wiki->word = $totalWord;
     }
 
     /**

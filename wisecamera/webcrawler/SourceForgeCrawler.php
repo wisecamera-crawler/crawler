@@ -22,6 +22,7 @@ use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
 use wisecamera\utility\WebUtility;
 use wisecamera\utility\ParseUtility;
+use wisecamera\utility\WordCountHelper;
 
 /**
  * A crawler for Sourceforge.net
@@ -129,7 +130,7 @@ class SourceForgeCrawler extends WebCrawler
 
         $totalUpdate = 0;
         $totalLine = 0;
-
+        $toalWord = 0;
         foreach ($authRandnumPic[0] as $value) {
             $wikiPage = new WikiPage();
             $_array=explode("/", $value);
@@ -139,15 +140,20 @@ class SourceForgeCrawler extends WebCrawler
             $wikiPage->title = $wiki_page_name;
             $wikiPage->url = "http://sourceforge.net/p/$this->id/wiki/$wiki_page_name/";
             $wikiPage->update = $this->fetchSFWikiUpdate($this->id, $wiki_page_name);
-            $wikiPage->line = $this->fetchSFWikiLineCount($this->id, $wiki_page_name);
+            $content = $this->getWikiContent($this->id, $wiki_page_name);
+            $wikiPage->line = WordCountHelper::lineCount($content);
+            $wikiPage->word = WordCountHelper::utf8WordsCount($content);
+ 
             $wikiPageList []= $wikiPage;
             $totalUpdate += $wikiPage->update;
             $totalLine += $wikiPage->line;
+            $totalWord += $wikiPage->word;
         }
 
         $wiki->pages = sizeof($authRandnumPic[0]);
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
+        $wiki->word = $totalWord;
     }
 
     /**
@@ -287,34 +293,28 @@ class SourceForgeCrawler extends WebCrawler
     }
 
     /**
-     * SourceForge Wiki Line counter
+     * getWikiContent
      *
-     * This function access SourceForge website and get
-     * Line count in Wiki content.
+     * The function to extract wiki's content from wiki page
      *
      * @param string $PROJECT   Project name
      * @param string $WIKINAME Project Wiki title
      *
-     * @return size of lines_array
+     * @return string   Wiki's content 
      *
      * @author Shannon Chang <shchang@gmail.com>
+     * @author Poyu Chen <poyu677@gmail.com>
      * @version 1.0
      */
-    private function fetchSFWikiLineCount($PROJECT, $WIKINAME)
+    private function getWikiContent($PROJECT, $WIKINAME)
     {
         $wikipage = WebUtility::getHtmlContent("http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/");
         //$wikipage = file_get_contents("http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/");
         $wikipage = str_replace(array("\r\n","\r","\n"), "", $wikipage);
         $wikipage = str_replace(array("\r\n","\r","\n"), "", $wikipage);
         preg_match('/<div class="editbox">(.*)<div id="comment">/', $wikipage, $wiki_array);
-        if (sizeof($wiki_array[1])>0) {
-            $wiki_array[1]=str_replace("<br />", "<p>", $wiki_array[1]);
-            //make <br> as <p>,so that we can count lines easier
-            $lines_array=explode("<p>", $wiki_array[1]);
-            return sizeof($lines_array);
-        } else {
-            return -2;
-        }
+        $wiki_array[1]=str_replace("<br />", "<p>", $wiki_array[1]);
+        return $wiki_array[0];
     }
 
     /**

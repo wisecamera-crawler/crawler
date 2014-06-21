@@ -21,6 +21,7 @@ use wisecamera\utility\DTOs\WikiPage;
 use wisecamera\utility\WebUtility;
 use wisecamera\utility\ParseUtility;
 use wisecamera\webcrawler\githubcrawler\GitHubIssue;
+use wisecamera\utility\WordCountHelper;
 
 /**
  * GithubCralwer
@@ -92,9 +93,10 @@ class GitHubCrawler extends WebCrawler
             $txt,
             $matches
         );
+        
         $totalUpdate = 0;
         $totalLine = 0;
-
+        $totalWord = 0;
         foreach ($matches[0] as $match) {
             $wikiPage = new WikiPage();
 
@@ -102,13 +104,15 @@ class GitHubCrawler extends WebCrawler
             $pageUrl = str_replace(" ", "-", $title);
 
             $update = $this->fetchGitHubWikiUpdate($pageUrl);
-            $line = $this->fetchGitHubWikiLineCount($pageUrl);
+            $content = $this->getWikiContent($this->baseUrl . "/wiki/" . $pageUrl);
+            $wikiPage->line = WordCountHelper::lineCount($content);
+            $wikiPage->word = WordCountHelper::utf8WordsCount($content);
 
             $totalUpdate += $update;
-            $totalLine += $line;
+            $totalLine += $wikiPage->line;
+            $totalWord += $wikiPage->word;
 
             $wikiPage->url = $this->baseUrl . "/wiki/$pageUrl";
-            $wikiPage->line = $line;
             $wikiPage->update = $update;
             $wikiPage->title = $title;
             $wikiPageList []= $wikiPage;
@@ -117,6 +121,7 @@ class GitHubCrawler extends WebCrawler
         $wiki->pages = sizeof($matches[0]);
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
+        $wiki->word = $totalWord;
     }
 
     /**
@@ -273,24 +278,19 @@ class GitHubCrawler extends WebCrawler
     }
 
     /**
-     * fetchGitHubWikiLineCount
+     * getWikiContent
      *
-     * Get assigned wiki page's line count.
-     * The information is caculated by third party utility
+     * The function to extract wiki's content from wiki page
      *
-     * @param string $wikiname The title of wiki page
+     * @param string $url Assigned page's url
      *
-     * @return int Line counts of the page
+     * @return string Wiki's content
      */
-    private function fetchGitHubWikiLineCount($wikiName)
+    private function getWikiContent($url)
     {
-        $tmp = explode("/", $this->baseUrl);
-        $name = $tmp[3];
-        $project = $tmp[4];
-
-        $commad = "python third/getGitHubWikiLine/getGitHubLine.py $name/$project/wiki/$wikiName";
-        $output = shell_exec($commad);
-
-        return $output;
+        $content = WebUtility::getHtmlContent($url);
+        $start = strpos($content, "<div class=\"markdown-body\">");
+        $end = strpos($content, "<div class=\"modal-backdrop\"></div>");
+        return substr($content, $start, $end - $start);
     }
 }
