@@ -24,6 +24,9 @@ use wisecamera\utility\DTOs\VCSCommiter;
  */
 class GitStat extends RepoStat
 {
+    /**
+     * logArr is used to store git log --stat --sumary result
+     */
     private $logArr;
 
     /**
@@ -51,8 +54,7 @@ class GitStat extends RepoStat
     /**
      * getSummary
      *
-     * We use gitstats (http://gitstats.sourceforge.net/) to help analysis information.
-     * In this function, we use gitstats to gen report and parse out info we want
+     * This function get VCS's summary from other functions.
      *
      * @param VCS $vcs The VCS object to transfer info
      *
@@ -96,8 +98,8 @@ class GitStat extends RepoStat
             $index = $i - 1;
 
             // Get Author
-            $tmpAuthors = explode('<', $tmp[$i]);
-            $authors[$index] = $tmpAuthors[0];
+            $tmpAuthors = explode('>', $tmp[$i]);
+            $authors[$index] = $tmpAuthors[0] . '>';
 
             // Get the number of file change
             $tmpFileChg = explode(' changed', $tmp[$i]);
@@ -165,6 +167,13 @@ class GitStat extends RepoStat
         }
     }
 
+    /**
+     * getAuthor
+     *
+     * This function get author's count through parse logArr
+     *
+     * @return int author's count
+     */
     private function getAuthor()
     {
         $authorArr = array();
@@ -176,6 +185,14 @@ class GitStat extends RepoStat
         return sizeof($authorArr);
     }
 
+    /**
+     * getCommit
+     *
+     * This function get commit's count through parse logArr
+     *
+     * @return int commit's count
+     */
+ 
     private function getCommit()
     {
         $ans = 0;

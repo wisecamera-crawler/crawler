@@ -115,7 +115,14 @@ abstract class RepoStat
             "-path \"*.git\" -prune -o -name \"*\"",
             $fileList
         );
-        return sizeof($fileList) - 1;
+
+        $count = 0;
+        foreach ($fileList as $file) {
+            if (is_file($file) === true) {
+                ++$count;
+            }
+        }
+        return $count;
     }
 
     /**
@@ -136,13 +143,15 @@ abstract class RepoStat
             "-path \"*.git\" -prune -o -name \"*\"",
             $fileList
         );
-
+        
         $count = 0;
         foreach ($fileList as $file) {
-            exec("wc -l $file", $arr);
-            $out = explode(" ", $arr[0]);
-            $count += (int)$out[0];
-            $arr = null;
+            if (is_file($file) === true) {
+                exec("wc -l $file", $arr);
+                $out = explode(" ", $arr[0]);
+                $count += (int)$out[0];
+                $arr = null;
+            }
         }
         return $count;
     }
