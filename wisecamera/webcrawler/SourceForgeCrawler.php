@@ -62,7 +62,7 @@ class SourceForgeCrawler extends WebCrawler
      */
     public function getIssue(Issue & $issue)
     {
-        $url="http://sourceforge.net/p/$this->id/bugs/search/?q=status%3Aopen+or+status%3Aclosed&limit=100&page=0";
+        $url="http://sourceforge.net/p/$this->id/bugs/search/?q=ticket_num%3A%5B*+TO+*%5D&limit=100&page=0";
 
         $time_out_count=0;
         while ($time_out_count<3&&($issueMainPage = WebUtility::getHtmlContent($url))===false) {
@@ -85,13 +85,14 @@ class SourceForgeCrawler extends WebCrawler
             }
 
             $page_counter=floor($total_issue/100);//take the number without float, read issues page by page
-            for ($i=1; $i<$page_counter; $i++) {
-                $url="http://sourceforge.net/p/$this->id/bugs/search/
-                ?q=status%3Aopen+or+status%3Aclosed&limit=100&page=$i";
+            for ($i=1; $i<=$page_counter; $i++) {
+                $url="http://sourceforge.net/p/$this->id/bugs/search/".
+                "?q=ticket_num%3A%5B*+TO+*%5D&limit=100&page=$i";
                 $time_out_count=0;
                 while ($time_out_count<3&&($issueMainPage = WebUtility::getHtmlContent($url))===false) {
                     $time_out_count++;
                 }
+                sleep(2);
                 preg_match_all('/<td><a href="\/p\/.*\/bugs\/\d*\/">(\d*)<\/a><\/td>/', $issueMainPage, $issue_array);
                 foreach ($issue_array[1] as $current_issue_no) {
                     $comments+=$this->traverseIssues(
