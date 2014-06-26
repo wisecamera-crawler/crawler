@@ -16,6 +16,9 @@ namespace wisecamera;
 //first, change to working drectory
 chdir(__DIR__);
 
+//set up timzone info
+date_default_timezone_set('Asia/Taipei');
+
 require_once "third/SplClassLoader.php";
 $loader = new \SplClassLoader();
 $loader->register();
