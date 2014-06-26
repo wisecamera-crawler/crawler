@@ -54,7 +54,7 @@ $id = $argv[1];
 
 try {
     $config = new Config();
-} catch (\Exception $e){
+} catch (\Exception $e) {
     echo $e->getMessage() . "\n";
     exit();
 }
@@ -146,7 +146,7 @@ if (WebUtility::getErrCode() == 0) {
 
 //analysis repos
 if (WebUtility::getErrCode() == 0) {
-$webCrawler->getRepoUrl($repoType, $repoUrl);
+    webCrawler->getRepoUrl($repoType, $repoUrl);
 
     echo "$repoType : "  . $repoUrl . "\n";
     $SQL->insertVCSType($repoType);

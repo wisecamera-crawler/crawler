@@ -20,13 +20,10 @@ crawler
 
 * url 該專案之首頁，不用care是哪個網站，程式會自動處理
 
-### VCS爬蟲測試 (目前不能使用)
-`php testStat.php <type> <id> <url>`
+### VCS爬蟲測試 
+`php testStat.php <url>`
 
-* type repo之型態、包含Git SVN HG CVS (注意大小寫)
-* id 在repo資料夾下的目錄 (對CVS沒用)，若該資料夾已存在，
-會進行update，否則進行clone
-* url repo URL
+* url 專案之首頁，會透過webcrawler解析repo url 
 
 ### TODO
 Important
