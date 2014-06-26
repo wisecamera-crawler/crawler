@@ -42,11 +42,11 @@ class SVNStat extends RepoStat
     public function getSummary(VCS & $vcs)
     {
         $authorAndCommit = $this->crawlAuthorAndCommit();
-        $vcs->commit = $authorAndCommit["totalAuthors"];
+        $vcs->user = $authorAndCommit["totalAuthors"];
         $vcs->file = $this->getFileCount();
         $vcs->line = $this->getTotalLine();
         $vcs->size = $this->getSize();
-        $vcs->user = $authorAndCommit["totalCommit"];
+        $vcs->commit = $authorAndCommit["totalCommit"];
     }
 
     public function getDataByCommiters(array & $commiters)
