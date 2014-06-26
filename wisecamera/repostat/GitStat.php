@@ -24,6 +24,8 @@ use wisecamera\utility\DTOs\VCSCommiter;
  */
 class GitStat extends RepoStat
 {
+    private $logArr;
+
     /**
      * Constructor
      *
@@ -42,6 +44,8 @@ class GitStat extends RepoStat
         } else {
             exec("cd repo; git clone $url $this->projectId", $arr);
         }
+
+        exec("cd repo/$this->projectId; git log --stat --summary;", $this->logArr);
     }
 
     /**
@@ -56,27 +60,11 @@ class GitStat extends RepoStat
      */
     public function getSummary(VCS & $vcs)
     {
-        $path = "repostat/gitstat";
-        exec("gitstats repo/$this->projectId test1");
-
         $vcs->user = $this->getAuthor();
         $vcs->commit = $this->getCommit();
-
-        $file = 'test1/files.html';
-        $fileContent = file_get_contents($file);
-
-        $tmp = explode('</dd>', $fileContent);
-        $tmpFiles= explode('<dd>', $tmp[0]);
-        $tmpLines= explode('<dd>', $tmp[1]);
-        $tmpFileSize= explode('<dd>', $tmp[2]);
-        //to MB
-        $totalFileSize = number_format(($tmpFileSize[1] / 1000 ), 4) * $tmpFiles[1];
-        //$totalFileSize = number_format( $totalFileSize, 2) ;
-
-        $vcs->file = $tmpFiles[1];
-        $vcs->line = $tmpLines[1];
-        $vcs->size = $totalFileSize;
-        exec("rm test1 -rf");
+        $vcs->file = $this->getFileCount();
+        $vcs->line = $this->getTotalLine();
+        $vcs->size = $this->getSize();    
     }
 
     /**
@@ -95,12 +83,10 @@ class GitStat extends RepoStat
         define("DELETE", "delete");
         define("MODIFY", "modify");
 
-        exec(
-            "cd repo; cd $this->projectId;
-            git log --stat --summary  > ../../output.txt"
-        );
-        $file = 'output.txt';
-        $fileContent = file_get_contents($file);
+        $fileContent = "";
+        foreach ($this->logArr as $line) {
+            $fileContent .= $line . "\n";
+        }
         $numOfActions = 0;
         $numOfFileChg = 0;
 
@@ -177,41 +163,28 @@ class GitStat extends RepoStat
             $v->new = $c["create"];
             $commiters []= $v;
         }
-
-        exec("rm output.txt");
     }
 
     private function getAuthor()
     {
-        $file = 'test1/authors.html';
-        $fileContent = file_get_contents($file);
-
-        $tmp = explode('</table>', $fileContent);
-        $tmp2 = explode('<td>', $tmp[0]);
-
-        $num = 0 ;
-        for ($i = 1; $i < count($tmp2); $i += 9) {
-            $num++;
+        $authorArr = array();
+        foreach ($this->logArr as $line) {
+            if(substr($line, 0, 6) === "Author") {
+                $authorArr[substr($line, 8)] = 1;
+            }
         }
-
-        return $num;
+        return sizeof($authorArr);
     }
 
     private function getCommit()
     {
-        $file = 'test1/activity.html';
-        $fileContent = file_get_contents($file);
-
-        $tmp = explode('<div class="vtable">', $fileContent);
-        $tmp2 = explode('<td>', $tmp[4]);
-
-        $num = 0 ;
-        for ($i = 1; $i < count($tmp2); $i += 4) {
-            $commitNum = explode('(', $tmp2[($i+1)]);
-            $num += $commitNum[0];
+        $ans = 0;
+        foreach ($this->logArr as $line) {
+            if (substr($line, 0, 6) === "commit") {
+                ++$ans;
+            }
         }
-
-        return $num;
+        return $ans;
     }
 
     private function isInt($str)

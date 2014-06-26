@@ -4,7 +4,6 @@ crawler
 ### 使用前
 * php, 並確定有安裝 php5-curl
 * git, cvs, svn, mercurial 
-* 安裝 GitStats (參考 http://gitstats.sourceforge.net/ , 請直接從source make, apt-get版本沒跟上)
 * 匯入DB (注意resource中的DB file 為資料表，須先建立`nsc`資料庫)
 
 ### 主程式
