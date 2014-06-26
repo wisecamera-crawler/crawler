@@ -146,7 +146,7 @@ if (WebUtility::getErrCode() == 0) {
 
 //analysis repos
 if (WebUtility::getErrCode() == 0) {
-    webCrawler->getRepoUrl($repoType, $repoUrl);
+    $webCrawler->getRepoUrl($repoType, $repoUrl);
 
     echo "$repoType : "  . $repoUrl . "\n";
     $SQL->insertVCSType($repoType);
