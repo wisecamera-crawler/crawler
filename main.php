@@ -87,64 +87,38 @@ if ($url == null) {
 //analysis web pages
 $webCrawler = WebCrawlerFactory::factory($url);
 
+//create DTOs
+$issue = new Issue();
+$wiki = new Wiki();
+$wikiList = array();
+$rank = new Rating();
+$dlArray = array();
+$vcs = new VCS();
+$cList = array();
+
 if (WebUtility::getErrCode() == 0) {
-    $issue = new Issue();
     $webCrawler->getIssue($issue);
-    
-    if (WebUtility::getErrCode() != 0) {
-        $SQL->updateState("issue", "proxy_error");
-        $SQL->updateState("wiki", "proxy_error");
-        $SQL->updateState("download", "proxy_error");
-        $SQL->updateState("vcs", "proxy_error");
-        echo "Connection seems had error when getting issue.\n";
-    } else {
-        echo "Issue:\n";
-        print_r($issue);
-        $SQL->insertIssue($issue);
-    }
+    echo "Issue:\n";
+    print_r($issue);
 }
 
 if (WebUtility::getErrCode() == 0) {
-    $wiki = new Wiki();
-    $wikiList = array();
     $webCrawler->getWiki($wiki, $wikiList);
-    
-    if (WebUtility::getErrCode() != 0) {
-        $SQL->updateState("wiki", "proxy_error");
-        $SQL->updateState("download", "proxy_error");
-        $SQL->updateState("vcs", "proxy_error");
-        echo "Connection seems had error when getting wiki.\n";
-    } else {
-        echo "Wiki:\n";
-        print_r($wiki);
-        print_r($wikiList);
-        $SQL->insertWiki($wiki);
-        $SQL->insertWikiPages($wikiList);
-    }
+    echo "Wiki:\n";
+    print_r($wiki);
+    print_r($wikiList);
 }
 
 if (WebUtility::getErrCode() == 0) {
-    $rank = new Rating();
     $webCrawler->getRating($rank);
-    
     echo "rating:\n";
     print_r($rank);
-    $SQL->insertRating($rank);
 }
 
 if (WebUtility::getErrCode() == 0) {
-    $dlArray = array();
     $webCrawler->getDownload($dlArray);
-    
-    if (WebUtility::getErrCode() != 0) {
-        $SQL->updateState("download", "proxy_error");
-        $SQL->updateState("vcs", "proxy_error");
-        echo "Connection seems had error when getting download.\n";
-    } else {
-        echo "download : \n";
-        print_r($dlArray);
-        $SQL->insertDownload($dlArray);
-    }
+    echo "download : \n";
+    print_r($dlArray);
 }
 
 //analysis repos
@@ -152,7 +126,6 @@ if (WebUtility::getErrCode() == 0) {
     $webCrawler->getRepoUrl($repoType, $repoUrl);
 
     echo "$repoType : "  . $repoUrl . "\n";
-    $SQL->insertVCSType($repoType);
 
     if ($repoType == "Git") {
         $repoStat = new GitStat($id, $repoUrl);
@@ -164,13 +137,27 @@ if (WebUtility::getErrCode() == 0) {
         $repoStat = new CVSStat($id, $repoUrl);
     }
 
-    $vcs = new VCS();
     $repoStat->getSummary($vcs);
     print_r($vcs);
-    $SQL->insertVCS($vcs);
-
-    $cList = array();
     $repoStat->getDataByCommiters($cList);
     print_r($cList);
+}
+
+//if connection error, abort all data
+if (WebUtility::getErrCode() != 0) {
+    $SQL->updateState("issue", "proxy_error");
+    $SQL->updateState("wiki", "proxy_error");
+    $SQL->updateState("download", "proxy_error");
+    $SQL->updateState("vcs", "proxy_error");
+    echo "Connection seems had error when getting issue.\n";
+//only insert data if no error occurs
+} else {
+    $SQL->insertVCSType($repoType);
+    $SQL->insertIssue($issue);
+    $SQL->insertWiki($wiki);
+    $SQL->insertWikiPages($wikiList);
+    $SQL->insertDownload($dlArray);
+    $SQL->insertRating($rank);
+    $SQL->insertVCS($vcs);
     $SQL->insertVCSCommiters($cList);
 }

@@ -66,7 +66,7 @@ class GitStat extends RepoStat
         $vcs->commit = $this->getCommit();
         $vcs->file = $this->getFileCount();
         $vcs->line = $this->getTotalLine();
-        $vcs->size = $this->getSize();    
+        $vcs->size = $this->getSize();
     }
 
     /**
@@ -178,7 +178,7 @@ class GitStat extends RepoStat
     {
         $authorArr = array();
         foreach ($this->logArr as $line) {
-            if(substr($line, 0, 6) === "Author") {
+            if (substr($line, 0, 6) === "Author") {
                 $authorArr[substr($line, 8)] = 1;
             }
         }
