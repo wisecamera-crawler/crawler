@@ -395,7 +395,7 @@ class GoogleCodeCrawler extends WebCrawler
             unset($revNum);
         }
 
-        $wiki->pages =  count($tmpRevNum);
+        $wiki->pages =  count($tmpRevNum)-1;
         $wiki->line = $totalLine;
         $wiki->update = $totalUpdate;
         $wiki->word = $totalWord;
