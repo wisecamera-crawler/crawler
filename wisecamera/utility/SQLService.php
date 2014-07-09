@@ -458,8 +458,8 @@ class SQLService
                 "INSERT INTO `crawl_status`
                     (`project_id`, `status`, `wiki`, `vcs`, `issue`,
                     `download`, `proxy_ip`, `starttime`, `endtime`)
-                    VALUES('$this->projectId', 'no_proxy', 'cannot_get_data',
-                        'cannot_get_data', 'cannot_get_data', 'cannot_get_data',
+                    VALUES('$this->projectId', 'no_proxy', 'no_proxy',
+                        'no_proxy', 'no_proxy', 'no_proxy',
                         '', '$this->startTime', '$this->endTime')"
             );
             $ip = "";
