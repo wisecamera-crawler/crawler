@@ -29,6 +29,8 @@ class GoogleCodeCrawler extends WebCrawler
     private $baseUrl = 'https://code.google.com/p/';
     private $baseLoginUrl= "";
     private $baseIssueUrl= "";
+    private $baseDownloadUrl = "";
+    private $totalDownload = 0;
     private $totalIssues = 0; // 總total issue數
     private $totalIssuesDiscuss = 0; // 所有issue 討論總數
     private $user_agent = 'Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
@@ -52,6 +54,7 @@ class GoogleCodeCrawler extends WebCrawler
         $this->projectName = $projectName;
         $this->baseUrl = $this->baseUrl.$projectName.'/';
         $this->baseIssueUrl = $this->baseUrl.'issues/list?can=1&q=&colspec=ID+Type+Status+Priority+Milestone+Owner+Summary';
+        $this->baseDownloadUrl = $this->baseUrl.'downloads/list?can=1&q=&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount';
         $this->baseLoginUrl = 'https://accounts.google.com/ServiceLogin?service=code&ltmpl=phosting&continue=https%3A%2F%2Fcode.google.com%2Fp%2F'.$this->projectName.'%2F&followup=https%3A%2F%2Fcode.google.com%2Fp%2F'.$this->projectName.'%2F';
         $this->blockTagAry = array(
             0 => "p",   1 => "li",   2 => "h1",   3 => "h2",  4 => "h3",
@@ -152,13 +155,13 @@ class GoogleCodeCrawler extends WebCrawler
     /**
     *   計算該專題的issue總數
     **/
-    private function curlIssuesTotal()
+    public function curlIssuesTotal()
     {
         curl_setopt($this->ch, CURLOPT_URL, $this->baseIssueUrl);
 
         $this->html = '';
         $this->html = curl_exec($this->ch);
-        $firstCut = explode('1 - 100', $this->html);
+        $firstCut = explode('<div class="pagination">', $this->html);
         $tmp = explode('of ', $firstCut[1]);
         $tmp2 = explode('<a', $tmp[1]);
         $this->totalIssues = trim($tmp2[0]);
@@ -192,6 +195,21 @@ class GoogleCodeCrawler extends WebCrawler
     }
 
     /**
+    *   計算該專題的download總數
+    **/
+    private function curlDownloadTotal()
+    {
+        curl_setopt($this->ch, CURLOPT_URL,   $this->baseDownloadUrl);
+
+        $this->html = '';
+        $this->html = curl_exec($this->ch);
+        $firstCut = explode('<div class="pagination">', $this->html);
+        $tmp = explode('of ', $firstCut[1]);
+        $tmp2 = explode('</div>', $tmp[1]);
+        $this->totalDownload = trim($tmp2[0]);
+    }
+    
+    /**
     *   取得download page的css clase名稱
     *
     *   Return:
@@ -200,9 +218,7 @@ class GoogleCodeCrawler extends WebCrawler
     **/
     private function curlDownloadClassName()
     {
-        $downloadUrl = $this->baseUrl . 'downloads/list';
-
-        curl_setopt($this->ch, CURLOPT_URL, $downloadUrl);
+        curl_setopt($this->ch, CURLOPT_URL, $this->baseDownloadUrl);
         $this->html = '';
         $this->html = curl_exec($this->ch);
 
@@ -457,7 +473,7 @@ class GoogleCodeCrawler extends WebCrawler
             }
         }
 
-        $issue->topic = $this->totalIssues;
+        $issue->topic = $this->totalIssues;echo "total issues: ".$this->totalIssues;
         $issue->open = $open;
         $issue->close = $close;
         //TODO: total account and articles?
@@ -499,31 +515,35 @@ class GoogleCodeCrawler extends WebCrawler
     **/
     public function getDownload(array &$donwload)
     {
+        $this->curlDownloadTotal();
         $downloadName = $this->curlDownloadName();
         $classNameAry = $this->curlDownloadClassName();
         $explodStr = 'vt '.$classNameAry[5];
         $tmpDownloadNum = explode($explodStr, $this->html);
         $downloadDetailUrl = $this->baseUrl . 'downloads/detail';
+        $dataInterval = 99;
         $downloads = array();
 
-        for ($i = 1; $i <  count($tmpDownloadNum); $i++) {
-            $tmp = explode('</a>', $tmpDownloadNum[$i]);
-            $tmp2 = explode('>', $tmp[0]);
+        for ($i = 0; $i < $this->totalDownload; $i += $dataInterval) {
+            for ($j = 1; $j <  count($tmpDownloadNum); $j++) {
+                $tmp = explode('</a>', $tmpDownloadNum[$j]);
+                $tmp2 = explode('>', $tmp[0]);
 
-            $idx = $i - 1;
-            $url = $downloadDetailUrl.'name='.$downloadName[$idx];
+                $idx = $j - 1;
+                $url = $downloadDetailUrl.'?name='.$downloadName[$idx];
 
-            $downloadUnit = new Download();
-            $downloadUnit->name = $downloadName[$idx];
-            $downloadUnit->url = $url;
-            $downloadUnit->count = (int) trim($tmp2[2]);
-            $donwload []= $downloadUnit;
+                $downloadUnit = new Download();
+                $downloadUnit->name = $downloadName[$idx];
+                $downloadUnit->url = $url;
+                $downloadUnit->count = (int) trim($tmp2[2]);
+                $donwload []= $downloadUnit;
 
-            unset($tmp);
-            unset($tmp2);
+                unset($tmp);
+                unset($tmp2);
+            }
         }
     }
-
+    
     /**
     *   取得使用者評分
     *
