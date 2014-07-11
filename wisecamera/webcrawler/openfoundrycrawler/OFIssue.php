@@ -86,21 +86,23 @@ class OFIssue
         if ($this->closeIssue != -1) {
             return $this->closeIssue;
         }
+        $this->closeIssue = 0;
 
         $issueCount = $this->getTotalIssue();
-        $content = WebUtility::getHtmlContent(
-            "https://www.openfoundry.org/rt/Search/Results.html?"
-            . "Query=Queue%20=%20%27" . $this->id . "%27&Rows="
-            . $issueCount
-        );
+        $pageCount = $issueCount/45 + 1; // one page has 45 issues
+        for ($i = 1; $i <= $pageCount ; ++$i) {
+            $content = WebUtility::getHtmlContent(
+                "https://www.openfoundry.org/rt/Search/Results.html?Query=Queue%20=%20%27" .
+                $this->id . "%27&Page=" . $i
+            );
 
-        $this->closeIssue = preg_match_all(
-            '/<td class="collection-as-table" align="center" '
-            . 'style="padding: 7px 0px 5px 0px;">resolved<\/td>/',
-            $content,
-            $matches
-        );
-
+            $this->closeIssue += preg_match_all(
+                '/<td class="collection-as-table" align="center" '
+                . 'style="padding: 7px 0px 5px 0px;">resolved<\/td>/',
+                $content,
+                $matches
+            );
+        }
         return $this->closeIssue;
     }
 
@@ -161,27 +163,38 @@ class OFIssue
      */
     private function traverseIssues()
     {
-        $content = WebUtility::getHtmlContent(
-            "https://www.openfoundry.org/rt/Search/Results.html?"
-            . "Query=Queue%20=%20%27" . $this->id . "%27&Rows="
-            . $this->getTotalIssue()
-        );
+        $this->article = 0;
+        $this->users = 0;
 
-        $issueIds = $this->resolveIssueIds($content);
+        $issueCount = $this->getTotalIssue();
+        $pageCount = $issueCount/45 + 1; // one page has 45 issue
+
         $authors = array();
-        $articles = 0;
-        foreach ($issueIds as $id) {
-            $issuePage = WebUtility::getHTMLContent(
-                "https://www.openfoundry.org/rt/Ticket/Display.html?id=$id"
+        for ($i = 1; $i <= $pageCount; ++$i) {
+            $content = WebUtility::getHtmlContent(
+                "https://www.openfoundry.org/rt/Search/Results.html?Query=Queue%20=%20%27" .
+                $this->id . "%27&Page=" . $i
             );
-            $articles += $this->getArticleInOneIssue($issuePage);
-            $this->getAuthorsInOneIssue($issuePage, $authors);
-        }
 
-        $this->articles = $articles;
+            $issueIds = $this->resolveIssueIds($content);
+            $articles = 0;
+            foreach ($issueIds as $id) {
+                //$issuePage = WebUtility::getHTMLContent(
+                //    "https://www.openfoundry.org/rt/Ticket/Display.html?id=$id"
+                //);
+                //TODO : fix getHtmlContent
+                $issuePage = file_get_contents(
+                    "https://www.openfoundry.org/rt/Ticket/Display.html?id=$id"
+                );
+                $articles += $this->getArticleInOneIssue($issuePage);
+                $this->getAuthorsInOneIssue($issuePage, $authors);
+            }
+
+            $this->articles += $articles;
+        }
         $this->users = sizeof($authors);
         if (isset($authors["RT_System"])) {
-            $this->users -= 1;
+                $this->users -= 1;
         }
     }
 
