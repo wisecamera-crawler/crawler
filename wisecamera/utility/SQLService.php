@@ -61,7 +61,7 @@ class SQLService
     /**
      * The proxy ip of this connecyion
      */
-    private $proxy;
+    public $proxy;
 
     /**
      * Start time and end time of this job
@@ -97,11 +97,13 @@ class SQLService
      *
      * @return none
      */
-    public function __construct($projectId, $proxy = "127.0.0.1")
+    public function __construct($projectId)
     {
         $this->setupDBConnection();
         $this->projectId = $projectId;
         $this->startTime = date("Y-m-d H:i:s");
+
+        $proxy = $this->chooseProxy();
         if ($proxy == "") {
             $this->writeError("proxy");
             return;
@@ -117,6 +119,7 @@ class SQLService
         $result->setFetchMode(PDO::FETCH_ASSOC);
         $this->lastData = $result->fetch();
         $this->proxy = $proxy;
+        echo $this->proxy . "\n";
     }
 
     /**
@@ -473,6 +476,7 @@ class SQLService
             WHERE `project_id` = '$this->projectId'"
         );
     }
+
     /**
      * writeSummary
      *
@@ -530,6 +534,53 @@ class SQLService
             WHERE `project_id` = '$this->projectId'"
         );
     }
+    
+    /**
+     * chooseProxy
+     *
+     * This function will choose availabe proxy in DB
+     * First, it will get proxy information from DB.
+     * Then randomly choose one to test its availibility.
+     * If the selected proxy is avalable, return the url.
+     * If not, update the DB (set off-line in DB), choose next proxy.
+     *
+     * @return string   Proxy url
+     */
+    private function chooseProxy()
+    {
+        $this->setupDBConnection();
+        $result = $this->connection->query(
+            "SELECT `proxy_ip`, `proxy_port`
+                FROM `proxy`
+                WHERE `status` = 'on-line'"
+        );
+
+        $data = $result->fetchAll(PDO::FETCH_ASSOC);
+        if (!$data) {
+            return "";
+        }
+        $key = array_rand($data);
+        $proxy = "socks5://" . $data[$key]["proxy_ip"] .  ":" . $data[$key]["proxy_port"];
+        while (!WebUtility::testConnection($proxy) and $data) {
+            $result = $this->connection->query(
+                "UPDATE `proxy`
+                    set `status` = 'off-line'
+                WHERE `proxy_ip` = '" . $data[$key]["proxy_ip"] . "'"
+            );
+
+            unset($data[$key]);
+            
+            if (!$data) {
+                return "";
+            }
+ 
+            $key = array_rand($data);
+            $proxy = "socks5://" . $data[$key]["proxy_ip"] .  ":" . $data[$key]["proxy_port"];
+        }
+
+        return $proxy;
+    }
+
 
     /**
      * setupDBConnection

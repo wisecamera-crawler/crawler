@@ -19,6 +19,7 @@ use wisecamera\utility\DTOs\Rating;
 use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
 use wisecamera\utility\WebUtility;
+use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 use wisecamera\webcrawler\githubcrawler\GitHubIssue;
 use wisecamera\utility\WordCountHelper;
@@ -42,10 +43,12 @@ class GitHubCrawler extends WebCrawler
      *
      * Record the input url as baseUrl
      *
-     * @param string $url The URL
+     * @param string $url   The URL
+     * @param string $proxy Proxy to use    
      */
-    public function __construct($url)
+    public function __construct($url, $proxy = null)
     {
+        $this->conn = new Connection($proxy);
         $this->baseUrl = $url;
     }
 
@@ -61,7 +64,7 @@ class GitHubCrawler extends WebCrawler
      */
     public function getIssue(Issue & $issue)
     {
-        $gi = new GitHubIssue($this->baseUrl . "/issues");
+        $gi = new GitHubIssue($this->baseUrl . "/issues", $this->conn);
         $issue->open = $gi->getOpenIssue();
         $issue->close =  $gi->getCloseIssue();
         $issue->topic = $gi->getTotalIssue();
@@ -84,7 +87,7 @@ class GitHubCrawler extends WebCrawler
     public function getWiki(Wiki & $wiki, array & $wikiPageList)
     {
         $url = $this->baseUrl . "/wiki/_pages";
-        $txt = WebUtility::getHtmlContent($url);
+        $txt = $this->conn->getHtmlContent($url);
         $tmp = explode("/", $this->baseUrl);
         $name = $tmp[3];
         $project = $tmp[4];
@@ -271,7 +274,7 @@ class GitHubCrawler extends WebCrawler
     private function fetchGitHubWikiUpdate($wikiName)
     {
         $url = $this->baseUrl . "/wiki/$wikiName/_history";
-        $txt = WebUtility::getHtmlContent($url);
+        $txt = $this->conn->getHtmlContent($url);
         preg_match_all('/<tr>/', $txt, $updateTimes);
 
         return sizeof($updateTimes[0])-1;
@@ -288,7 +291,7 @@ class GitHubCrawler extends WebCrawler
      */
     private function getWikiContent($url)
     {
-        $content = WebUtility::getHtmlContent($url);
+        $content = $this->conn->getHtmlContent($url);
         $start = strpos($content, "<div class=\"markdown-body\">");
         $end = strpos($content, "<div class=\"modal-backdrop\"></div>");
         return substr($content, $start, $end - $start);

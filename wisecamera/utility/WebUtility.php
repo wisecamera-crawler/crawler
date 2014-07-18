@@ -215,7 +215,7 @@ class WebUtility
      *
      * @return bool True for OK, false for bad connection
      */
-    private static function testConnection($proxy = null)
+    public static function testConnection($proxy = null)
     {
         $html = WebUtility::connect("www.google.com", $proxy);
         if ($html === null) {

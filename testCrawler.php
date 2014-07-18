@@ -21,6 +21,7 @@ $loader = new \SplClassLoader();
 $loader->register();
 
 use wisecamera\utility\WebUtility;
+use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\DTOs\Download;
 use wisecamera\utility\DTOs\Issue;

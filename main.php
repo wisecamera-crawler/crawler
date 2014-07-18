@@ -26,6 +26,7 @@ $loader->register();
 use wisecamera\utility\Config;
 use wisecamera\utility\SQLService;
 use wisecamera\utility\WebUtility;
+use wisecamera\utility\Conneciotn;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\DTOs\Download;
 use wisecamera\utility\DTOs\Issue;
@@ -68,12 +69,8 @@ SQLService::$user = $config->getValue("user");
 SQLService::$password = $config->getValue("password");
 SQLService::$db = $config->getValue("dbname");
 
-//use proxy
-WebUtility::useProxy(true);
-$proxy = WebUtility::getProxy();
-
-$SQL = new SQLService($id, $proxy);
-if ($proxy == "") {
+$SQL = new SQLService($id);
+if ($SQL->proxy == "") {
     echo "No Proxy\n";
     return;
 }

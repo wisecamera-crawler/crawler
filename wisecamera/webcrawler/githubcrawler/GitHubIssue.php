@@ -11,6 +11,7 @@
 namespace wisecamera\webcrawler\githubcrawler;
 
 use wisecamera\utility\WebUtility;
+use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 
 /**
@@ -33,16 +34,23 @@ class GitHubIssue
     private $mainPageHtml;
 
     /**
+     * Connection object
+     */
+    private $conn;
+
+    /**
      * Constructor
      *
      * Input is main page's url of issue tracker, get the html content
      *
-     * @param string $url   The base url of assigned issue tracker
+     * @param string $url       The base url of assigned issue tracker
+     * @param Connection $conn  The Connection object to use
      */
-    public function __construct($url)
+    public function __construct($url, $conn)
     {
+        $this->conn = $conn;
         $this->baseurl = $url;
-        $this->mainPageHtml = WebUtility::getHtmlContent($url);
+        $this->mainPageHtml = $this->conn->getHtmlContent($url);
     }
 
     /**
@@ -103,7 +111,7 @@ class GitHubIssue
         $totalComments = 0;
         $authors = array();
         for ($i = 1; $i <= $issueCount; ++$i) {
-            $html = WebUtility::getHtmlContent($this->baseurl . "/" . $i);
+            $html = $this->conn->getHtmlContent($this->baseurl . "/" . $i);
             $totalComments += $this->getCommentCountInSingleIssuePage($html);
             $this->getAuthorCountInSingleIssuePage($html, $authors);
         }

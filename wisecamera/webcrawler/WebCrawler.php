@@ -31,14 +31,20 @@ use wisecamera\utility\DTOs\WikiPage;
 abstract class WebCrawler
 {
     /**
+     * Connection object
+     */
+    protected $conn;
+
+    /**
      * Constructor
      *
      * The constructor of WebCrawler class should take the url as parameter
      * This url is the project's main page on the repo host website
      *
-     * @param string $url The URL
+     * @param string $url   The URL of main project's page 
+     * @param stinrg $proxy Proxy want to use, null for no proxy
      */
-    abstract public function __construct($url);
+    abstract public function __construct($url, $proxy = null);
 
     /**
      * getIssue
