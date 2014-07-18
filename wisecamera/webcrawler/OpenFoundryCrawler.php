@@ -18,7 +18,7 @@ use wisecamera\utility\DTOs\Issue;
 use wisecamera\utility\DTOs\Rating;
 use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
-use wisecamera\utility\WebUtility;
+use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\WordCountHelper;
 use wisecamera\webcrawler\openfoundrycrawler\OFIssue;
@@ -50,8 +50,9 @@ class OpenFoundryCrawler extends WebCrawler
      *
      * @param string $url The URL
      */
-    public function __construct($url)
+    public function __construct($url, $proxy = null)
     {
+        $this->conn = new Connection($proxy);
         $arr = explode("/", $url);
         $this->ofId =  $arr[5];
         $this->baseUrl = $url;
@@ -69,7 +70,7 @@ class OpenFoundryCrawler extends WebCrawler
      */
     public function getIssue(Issue & $issue)
     {
-        $ofIssue = new OFIssue($this->ofId);
+        $ofIssue = new OFIssue($this->ofId, $this->conn);
         $issue->topic = $ofIssue->getTotalIssue();
         $issue->close = $ofIssue->getCloseIssue();
         $issue->open = $ofIssue->getOpenIssue();
@@ -92,7 +93,7 @@ class OpenFoundryCrawler extends WebCrawler
      */
     public function getWiki(Wiki & $wiki, array & $wikiPageList)
     {
-        $content = WebUtility::getHtmlContent($this->baseUrl . "/wiki/list");
+        $content = $this->conn->getHtmlContent($this->baseUrl . "/wiki/list");
         $htmlArr = explode("\n", $content);
 
         $pos = 290;
@@ -161,7 +162,7 @@ class OpenFoundryCrawler extends WebCrawler
      */
     public function getDownload(array & $download)
     {
-        $content = WebUtility::getHtmlContent($this->baseUrl . "/download");
+        $content = $this->conn->getHtmlContent($this->baseUrl . "/download");
         $htmlArr = explode("\n", $content);
 
         for ($i = 0; $i < sizeof($htmlArr); ++$i) {
@@ -196,7 +197,7 @@ class OpenFoundryCrawler extends WebCrawler
      */
     public function getRepoUrl(&$type, &$url)
     {
-        $content = WebUtility::getHtmlContent($this->baseUrl . "/vcs_access");
+        $content = $this->conn->getHtmlContent($this->baseUrl . "/vcs_access");
         $htmlArr = explode("\n", $content);
 
         $title = "";
@@ -238,7 +239,7 @@ class OpenFoundryCrawler extends WebCrawler
      */
     private function getWikiContent($url)
     {
-        $content = WebUtility::getHtmlContent($url);
+        $content = $this->conn->getHtmlContent($url);
         preg_match("/<hr\/>.*<hr\/>/s", $content, $matches);
 
         return substr($matches[0], 0, -20);

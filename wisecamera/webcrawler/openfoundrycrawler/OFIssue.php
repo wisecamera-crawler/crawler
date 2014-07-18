@@ -10,7 +10,7 @@
  */
 namespace wisecamera\webcrawler\openfoundrycrawler;
 
-use wisecamera\utility\WebUtility;
+use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 
 /**
@@ -27,6 +27,8 @@ class OFIssue
      */
     private $id;
 
+    private $conn;
+    
     /**
      * To cache the result in class.
      * If data is -1, means this target has not been analysis,
@@ -44,8 +46,9 @@ class OFIssue
      *
      * @param string $id Id of openfoundry project
      */
-    public function __construct($id)
+    public function __construct($id, $conn)
     {
+        $this->conn = $conn;
         $this->id = $id;
     }
 
@@ -62,7 +65,7 @@ class OFIssue
             return $this->issueCount;
         }
 
-        $content = WebUtility::getHtmlContent(
+        $content = $this->conn->getHtmlContent(
             "https://www.openfoundry.org/rt/Search/Results.html?"
             . "Query=Queue%20=%20%27" . $this->id . "%27"
         );
@@ -91,7 +94,7 @@ class OFIssue
         $issueCount = $this->getTotalIssue();
         $pageCount = $issueCount/45 + 1; // one page has 45 issues
         for ($i = 1; $i <= $pageCount; ++$i) {
-            $content = WebUtility::getHtmlContent(
+            $content = $this->conn->getHtmlContent(
                 "https://www.openfoundry.org/rt/Search/Results.html?Query=Queue%20=%20%27" .
                 $this->id . "%27&Page=" . $i
             );
@@ -163,7 +166,7 @@ class OFIssue
      */
     private function traverseIssues()
     {
-        $this->article = 0;
+        $this->articles = 0;
         $this->users = 0;
 
         $issueCount = $this->getTotalIssue();
@@ -171,7 +174,7 @@ class OFIssue
 
         $authors = array();
         for ($i = 1; $i <= $pageCount; ++$i) {
-            $content = WebUtility::getHtmlContent(
+            $content = $this->conn->getHtmlContent(
                 "https://www.openfoundry.org/rt/Search/Results.html?Query=Queue%20=%20%27" .
                 $this->id . "%27&Page=" . $i
             );
@@ -179,13 +182,13 @@ class OFIssue
             $issueIds = $this->resolveIssueIds($content);
             $articles = 0;
             foreach ($issueIds as $id) {
-                //$issuePage = WebUtility::getHTMLContent(
-                //    "https://www.openfoundry.org/rt/Ticket/Display.html?id=$id"
-                //);
-                //TODO : fix getHtmlContent
-                $issuePage = file_get_contents(
+                $issuePage = $this->conn->getHTMLContent(
                     "https://www.openfoundry.org/rt/Ticket/Display.html?id=$id"
                 );
+                //TODO : fix getHtmlContent
+                //$issuePage = file_get_contents(
+                //    "https://www.openfoundry.org/rt/Ticket/Display.html?id=$id"
+                //);
                 $articles += $this->getArticleInOneIssue($issuePage);
                 $this->getAuthorsInOneIssue($issuePage, $authors);
             }

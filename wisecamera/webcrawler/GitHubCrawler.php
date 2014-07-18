@@ -18,7 +18,6 @@ use wisecamera\utility\DTOs\Issue;
 use wisecamera\utility\DTOs\Rating;
 use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
-use wisecamera\utility\WebUtility;
 use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 use wisecamera\webcrawler\githubcrawler\GitHubIssue;

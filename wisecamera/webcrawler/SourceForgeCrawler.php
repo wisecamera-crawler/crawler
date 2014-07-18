@@ -20,7 +20,7 @@ use wisecamera\utility\DTOs\Issue;
 use wisecamera\utility\DTOs\Rating;
 use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
-use wisecamera\utility\WebUtility;
+use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\WordCountHelper;
 
@@ -40,8 +40,9 @@ class SourceForgeCrawler extends WebCrawler
 {
     private $id;
     private $baseUrl;
-    public function __construct($url)
+    public function __construct($url, $proxy = null)
     {
+        $this->conn = new Connection($proxy);
         $this->baseUrl = $url;
         $arr = explode("/", $url);
         $this->id = $arr[4];
@@ -65,7 +66,7 @@ class SourceForgeCrawler extends WebCrawler
         $url="http://sourceforge.net/p/$this->id/bugs/search/?q=ticket_num%3A%5B*+TO+*%5D&limit=100&page=0";
 
         $time_out_count=0;
-        while ($time_out_count<3&&($issueMainPage = WebUtility::getHtmlContent($url))===false) {
+        while ($time_out_count<3&&($issueMainPage = $this->conn->getHtmlContent($url))===false) {
             $time_out_count++;
         }
         //Need to take care sometimes will get internal server error
@@ -89,7 +90,7 @@ class SourceForgeCrawler extends WebCrawler
                 $url="http://sourceforge.net/p/$this->id/bugs/search/".
                 "?q=ticket_num%3A%5B*+TO+*%5D&limit=100&page=$i";
                 $time_out_count=0;
-                while ($time_out_count<3&&($issueMainPage = WebUtility::getHtmlContent($url))===false) {
+                while ($time_out_count<3&&($issueMainPage = $this->conn->getHtmlContent($url))===false) {
                     $time_out_count++;
                 }
                 sleep(2);
@@ -126,7 +127,7 @@ class SourceForgeCrawler extends WebCrawler
     public function getWiki(Wiki & $wiki, array & $wikiPageList)
     {
         $url = "http://sourceforge.net/p/$this->id/wiki/browse_pages/";
-        $txt = WebUtility::getHtmlContent($url);
+        $txt = $this->conn->getHtmlContent($url);
         preg_match_all('/<td><a href="\/p\/(.*)\/wiki\/(.*)\/">(.*)<\/a><\/td>/', $txt, $authRandnumPic);
 
         $totalUpdate = 0;
@@ -174,7 +175,7 @@ class SourceForgeCrawler extends WebCrawler
     public function getRating(Rating & $rating)
     {
         $URL = "http://sourceforge.net/projects/$this->id/reviews?source=navbar";
-        $txt = WebUtility::getHtmlContent($URL);
+        $txt = $this->conn->getHtmlContent($URL);
         preg_match_all('/<div class="stars-5" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank5);
         preg_match_all('/<div class="stars-4" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank4);
         preg_match_all('/<div class="stars-3" style="border-left-width: \d*px">(.*?)<\/div>/si', $txt, $rank3);
@@ -212,7 +213,7 @@ class SourceForgeCrawler extends WebCrawler
     public function getDownload(array & $download)
     {
         $url = "http://sourceforge.net/projects/$this->id/files/";
-        $DLMainPage = WebUtility::getHtmlContent($url);
+        $DLMainPage = $this->conn->getHtmlContent($url);
 
         preg_match_all('/<tr title="(.*)" class="folder ">/', $DLMainPage, $DL_array);
         //Need to add folder/file check, if file, just add dl count into $DL_count_array
@@ -239,7 +240,7 @@ class SourceForgeCrawler extends WebCrawler
     public function getRepoUrl(&$type, &$url)
     {
         $Code_url = "http://sourceforge.net/p/$this->id/code/";
-        $CodePage = WebUtility::getHtmlContent($Code_url);
+        $CodePage = $this->conn->getHtmlContent($Code_url);
         preg_match_all('/<a href="#" class="btn" data-url="(.*)" title="Read Only">/', $CodePage, $Code_array);
         preg_match_all('/cvs -d:(pserver:\S*)  login <br\/>/', $CodePage, $CVS_array);
 
@@ -284,7 +285,7 @@ class SourceForgeCrawler extends WebCrawler
     private function fetchSFWikiUpdate($PROJECT, $WIKINAME)
     {
         $URL = "http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/history";
-        $txt = WebUtility::getHtmlContent($URL);
+        $txt = $this->conn->getHtmlContent($URL);
         preg_match_all('/<span title/', $txt, $updateTimes);
         if (sizeof($updateTimes[0])>0) {
             return sizeof($updateTimes[0]);
@@ -309,7 +310,7 @@ class SourceForgeCrawler extends WebCrawler
      */
     private function getWikiContent($PROJECT, $WIKINAME)
     {
-        $wikipage = WebUtility::getHtmlContent("http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/");
+        $wikipage = $this->conn->getHtmlContent("http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/");
         //$wikipage = file_get_contents("http://sourceforge.net/p/$PROJECT/wiki/$WIKINAME/");
         $wikipage = str_replace(array("\r\n","\r","\n"), "", $wikipage);
         $wikipage = str_replace(array("\r\n","\r","\n"), "", $wikipage);
@@ -338,7 +339,7 @@ class SourceForgeCrawler extends WebCrawler
     {
         foreach ($previous_DL_array as $DL_item) {
             $url=$baseUrl.$DL_item."/";
-            $DLMainPage = WebUtility::getHtmlContent($url);
+            $DLMainPage = $this->conn->getHtmlContent($url);
             //$DLMainPage = file_get_contents($url);
 
             preg_match_all('/<tr title="(.*)" class="folder ">/', $DLMainPage, $DL_array);
@@ -395,7 +396,7 @@ class SourceForgeCrawler extends WebCrawler
         $Last_day=date("Y-m-d");
         $URL=$URL."?dates=1999-1-1+to+".$Last_day;
         //$DLcountsPage = file_get_contents($URL);
-        $DLcountsPage = WebUtility::getHtmlContent($URL);
+        $DLcountsPage = $this->conn->getHtmlContent($URL);
         if (preg_match('/<td headers="files_downloads_h">(\S*)<\/td>/', $DLcountsPage, $DLcounts_array)) {
             return ParseUtility::intStrToInt($DLcounts_array[1]);
         } else {
@@ -422,7 +423,7 @@ class SourceForgeCrawler extends WebCrawler
     {
         $totalComments = 0;
         //$html = file_get_contents($baseUrl . "/" . $issue_no);
-        $html = WebUtility::getHtmlContent($baseUrl . "/" . $issue_no."/");
+        $html = $this->conn->getHtmlContent($baseUrl . "/" . $issue_no."/");
         $totalComments += $this->getCommentCountInSingleIssuePage($html);
         $this->getAuthorCountInSingleIssuePage($html, $authors);
         return $totalComments;

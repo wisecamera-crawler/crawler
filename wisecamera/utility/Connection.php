@@ -49,7 +49,7 @@ class Connection
             "(KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19";
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($this->ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, 8);
         curl_setopt($this->ch, CURLOPT_USERAGENT, $user_agent);
 
         //May check proxy?
