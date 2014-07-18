@@ -199,7 +199,7 @@ class GoogleCodeCrawler extends WebCrawler
     **/
     private function curlDownloadTotal()
     {
-        curl_setopt($this->ch, CURLOPT_URL,   $this->baseDownloadUrl);
+        curl_setopt($this->ch, CURLOPT_URL, $this->baseDownloadUrl);
 
         $this->html = '';
         $this->html = curl_exec($this->ch);
@@ -473,7 +473,8 @@ class GoogleCodeCrawler extends WebCrawler
             }
         }
 
-        $issue->topic = $this->totalIssues;echo "total issues: ".$this->totalIssues;
+        $issue->topic = $this->totalIssues;
+        echo "total issues: ".$this->totalIssues;
         $issue->open = $open;
         $issue->close = $close;
         //TODO: total account and articles?

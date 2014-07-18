@@ -90,7 +90,7 @@ class OFIssue
 
         $issueCount = $this->getTotalIssue();
         $pageCount = $issueCount/45 + 1; // one page has 45 issues
-        for ($i = 1; $i <= $pageCount ; ++$i) {
+        for ($i = 1; $i <= $pageCount; ++$i) {
             $content = WebUtility::getHtmlContent(
                 "https://www.openfoundry.org/rt/Search/Results.html?Query=Queue%20=%20%27" .
                 $this->id . "%27&Page=" . $i
