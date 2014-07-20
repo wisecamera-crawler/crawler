@@ -10,7 +10,6 @@
  */
 namespace wisecamera\webcrawler\githubcrawler;
 
-use wisecamera\utility\WebUtility;
 use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 

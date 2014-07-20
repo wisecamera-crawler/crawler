@@ -1,6 +1,6 @@
 <?php
 /**
- * WebUtility.php : Provide the APIs for crawler to get html content
+ * Connection.php : Provide the APIs for crawler to get html content
  *
  * PHP version 5
  *
@@ -90,8 +90,7 @@ class Connection
         curl_setopt($this->ch, CURLOPT_URL, $url);
         $txt = curl_exec($this->ch);
         if (curl_errno($this->ch)) {
-            echo curl_error($this->ch);
-            return null;
+            throw new \Exception(curl_error($this->ch));
         }
         return $txt;
     }

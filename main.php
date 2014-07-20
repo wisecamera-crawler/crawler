@@ -20,12 +20,11 @@ chdir(__DIR__);
 date_default_timezone_set('Asia/Taipei');
 
 require_once "third/SplClassLoader.php";
-$loader = new \SplClassLoader();
+$loader = new \SplClassLoader('wisecamera');
 $loader->register();
 
 use wisecamera\utility\Config;
 use wisecamera\utility\SQLService;
-use wisecamera\utility\WebUtility;
 use wisecamera\utility\Conneciotn;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\DTOs\Download;
@@ -93,33 +92,24 @@ $dlArray = array();
 $vcs = new VCS();
 $cList = array();
 
-if (WebUtility::getErrCode() == 0) {
+try {
     $webCrawler->getIssue($issue);
     echo "Issue:\n";
     print_r($issue);
-}
 
-if (WebUtility::getErrCode() == 0) {
     $webCrawler->getWiki($wiki, $wikiList);
     echo "Wiki:\n";
     print_r($wiki);
     print_r($wikiList);
-}
 
-if (WebUtility::getErrCode() == 0) {
     $webCrawler->getRating($rank);
     echo "rating:\n";
     print_r($rank);
-}
 
-if (WebUtility::getErrCode() == 0) {
     $webCrawler->getDownload($dlArray);
     echo "download : \n";
     print_r($dlArray);
-}
 
-//analysis repos
-if (WebUtility::getErrCode() == 0) {
     $webCrawler->getRepoUrl($repoType, $repoUrl);
 
     echo "$repoType : "  . $repoUrl . "\n";
@@ -138,23 +128,20 @@ if (WebUtility::getErrCode() == 0) {
     print_r($vcs);
     $repoStat->getDataByCommiters($cList);
     print_r($cList);
-}
-
-//if connection error, abort all data
-if (WebUtility::getErrCode() != 0) {
+} catch (\Exception $e) {
+    echo $e->getMessage();
     $SQL->updateState("issue", "proxy_error");
     $SQL->updateState("wiki", "proxy_error");
     $SQL->updateState("download", "proxy_error");
     $SQL->updateState("vcs", "proxy_error");
-    echo "Connection seems had error when getting issue.\n";
-//only insert data if no error occurs
-} else {
-    $SQL->insertVCSType($repoType);
-    $SQL->insertIssue($issue);
-    $SQL->insertWiki($wiki);
-    $SQL->insertWikiPages($wikiList);
-    $SQL->insertDownload($dlArray);
-    $SQL->insertRating($rank);
-    $SQL->insertVCS($vcs);
-    $SQL->insertVCSCommiters($cList);
+    exit();
 }
+    
+$SQL->insertVCSType($repoType);
+$SQL->insertIssue($issue);
+$SQL->insertWiki($wiki);
+$SQL->insertWikiPages($wikiList);
+$SQL->insertDownload($dlArray);
+$SQL->insertRating($rank);
+$SQL->insertVCS($vcs);
+$SQL->insertVCSCommiters($cList);
