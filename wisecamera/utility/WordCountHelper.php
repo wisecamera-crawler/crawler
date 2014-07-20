@@ -68,10 +68,15 @@ class WordCountHelper
         $count2 = sizeof($match[0]);
         $str3 = preg_replace('#([0-9]+([,][0-9]+)+)#i', "", $str2);
 
+        // handle of  aaaa-b
+        preg_match_all('#([A-Za-z]+([-][A-Za-z]+)+)#i',$str3,$match);
+        $count4 = sizeof($match[0]);
+        $str4 = preg_replace('#([A-Za-z]+([-][A-Za-z]+)+)#i', "", $str3);
+
         // handle of english words, pure digital, and english mix with digitals
-        preg_match_all('#([A-Za-z0-9]+)#i', $str3, $match);
+        preg_match_all('#([A-Za-z0-9]+)#i', $str4, $match);
         $count3 = sizeof($match[0]);
 
-        return $count3 + $count2 + $count1 + $cwordCount;
+        return $count4 + $count3 + $count2 + $count1 + $cwordCount;
     }
 }
