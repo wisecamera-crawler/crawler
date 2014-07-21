@@ -76,6 +76,7 @@ if ($SQL->proxy == "") {
 }
 
 $url = $SQL->getProjectInfo("url");
+
 if ($url == null) {
     echo "URL is null\n";
     return;
@@ -92,64 +93,27 @@ $rank = new Rating();
 $dlArray = array();
 $vcs = new VCS();
 $cList = array();
+$repoType = "";
 
-try {
-    $webCrawler->getIssue($issue);
-    echo "Issue:\n";
-    print_r($issue);
-
-    $webCrawler->getWiki($wiki, $wikiList);
-    echo "Wiki:\n";
-    print_r($wiki);
-    print_r($wikiList);
-
-    $webCrawler->getRating($rank);
-    echo "rating:\n";
-    print_r($rank);
-
-    $webCrawler->getDownload($dlArray);
-    echo "download : \n";
-    print_r($dlArray);
-
-    $webCrawler->getRepoUrl($repoType, $repoUrl);
-
-    echo "$repoType : "  . $repoUrl . "\n";
-
-    if ($repoType == "Git") {
-        $repoStat = new GitStat($id, $repoUrl);
-    } elseif ($repoType == "SVN") {
-        $repoStat = new SVNStat($id, $repoUrl);
-    } elseif ($repoType == "HG") {
-        $repoStat = new HGStat($id, $repoUrl);
-    } elseif ($repoType == "CVS") {
-        $repoStat = new CVSStat($id, $repoUrl);
-    }
-
-    $repoStat->getSummary($vcs);
-    print_r($vcs);
-    $repoStat->getDataByCommiters($cList);
-    print_r($cList);
-} catch (\Exception $e) {
-    //When exception occurs, ther may be 2 situtations
-    //  1. Proxy error
-    //  2. Cralwer is blocked/target web site is down
-    //So we have to test proxy's connectivity
-    if (WebUtility::testConnection($SQL->proxy) === true) {
-        $SQL->updateState("issue", "cannot_get_data");
-        $SQL->updateState("wiki", "cannot_get_data");
-        $SQL->updateState("download", "cannot_get_data");
-        $SQL->updateState("vcs", "cannot_get_data");
+$count = 3;
+//work
+while ($count > 0) {
+    work();
+    if ($SQL->checkIssue($issue) === false) {
+        --$count;
+        $webCrawler = WebCrawlerFactory::factory($url);
     } else {
-       $SQL->updateState("issue", "proxy_error");
-        $SQL->updateState("wiki", "proxy_error");
-        $SQL->updateState("download", "proxy_error");
-        $SQL->updateState("vcs", "proxy_error");
+        break;
     }
+}
 
-    echo $e->getMessage(); 
+if ($count == 0) {
+    echo "Some error occurs";
+    $SQL->updateState("issue", "can_not_resolve");
     exit();
 }
-    
+
+//insert into DB
 $SQL->insertVCSType($repoType);
 $SQL->insertIssue($issue);
 $SQL->insertWiki($wiki);
@@ -158,3 +122,72 @@ $SQL->insertDownload($dlArray);
 $SQL->insertRating($rank);
 $SQL->insertVCS($vcs);
 $SQL->insertVCSCommiters($cList);
+
+/**
+ * function work
+ *
+ * This function call crawlers to work
+ */
+function work()
+{
+    global $issue, $wiki, $wikiList, $rank, $dlArray, $vcs, $cList, $repoType;
+    global $webCrawler, $id;
+
+    try {
+        $webCrawler->getIssue($issue);
+        echo "Issue:\n";
+        print_r($issue);
+
+        $webCrawler->getWiki($wiki, $wikiList);
+        echo "Wiki:\n";
+        print_r($wiki);
+        print_r($wikiList);
+
+        $webCrawler->getRating($rank);
+        echo "rating:\n";
+        print_r($rank);
+
+        $webCrawler->getDownload($dlArray);
+        echo "download : \n";
+        print_r($dlArray);
+
+        $webCrawler->getRepoUrl($repoType, $repoUrl);
+
+        echo "$repoType : "  . $repoUrl . "\n";
+
+        if ($repoType == "Git") {
+            $repoStat = new GitStat($id, $repoUrl);
+        } elseif ($repoType == "SVN") {
+            $repoStat = new SVNStat($id, $repoUrl);
+        } elseif ($repoType == "HG") {
+            $repoStat = new HGStat($id, $repoUrl);
+        } elseif ($repoType == "CVS") {
+            $repoStat = new CVSStat($id, $repoUrl);
+        }
+
+        $repoStat->getSummary($vcs);
+        print_r($vcs);
+        $repoStat->getDataByCommiters($cList);
+        print_r($cList);
+    } catch (\Exception $e) {
+        //When exception occurs, ther may be 2 situtations
+        //  1. Proxy error
+        //  2. Cralwer is blocked/target web site is down
+        //So we have to test proxy's connectivity
+        if (WebUtility::testConnection($SQL->proxy) === true) {
+            $SQL->updateState("issue", "cannot_get_data");
+            $SQL->updateState("wiki", "cannot_get_data");
+            $SQL->updateState("download", "cannot_get_data");
+            $SQL->updateState("vcs", "cannot_get_data");
+        } else {
+           $SQL->updateState("issue", "proxy_error");
+            $SQL->updateState("wiki", "proxy_error");
+            $SQL->updateState("download", "proxy_error");
+            $SQL->updateState("vcs", "proxy_error");
+        }
+
+        echo $e->getMessage(); 
+        exit();
+    }
+}
+

@@ -134,6 +134,23 @@ class SQLService
     }
 
     /**
+     * checkIssue
+     *
+     * This function check issue object's data is resonable
+     *
+     * @param Issue $issue  The issue object to check
+     *
+     * @return boolean  true for OK
+     */
+    public function checkIssue(Issue $issue)
+    {
+        if((int)$this->lastData["issue_topic"] < (int)$issue->topic) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * insertIssue
      *
      * Insert the issue data into DB, and checl if data changed
@@ -225,13 +242,7 @@ class SQLService
             (int)$this->lastData["vcs_user"] != (int)$vcs->user or
             (int)$this->lastData["vcs_file"] != (int)$vcs->file
         ) {
-            echo (int)$this->lastData["vcs_commit"] != (int)$vcs->commit . "\n";
-            echo (double)$this->lastData["vcs_size"] != (double)$vcs->size . "\n";
-            echo (int)$this->lastData["vcs_line"] != (int)$vcs->line . "\n";
-            echo (int)$this->lastData["vcs_user"] != (int)$vcs->user . "\n";
-            echo (int)$this->lastData["vcs_file"] != (int)$vcs->file . "\n";
-    
-                $this->vcsState = "success_update";
+            $this->vcsState = "success_update";
         }
 
         $this->connection->query(
