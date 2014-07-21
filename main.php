@@ -26,6 +26,7 @@ $loader->register();
 use wisecamera\utility\Config;
 use wisecamera\utility\SQLService;
 use wisecamera\utility\Conneciotn;
+use wisecamera\utility\WebUtility;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\DTOs\Download;
 use wisecamera\utility\DTOs\Issue;
@@ -129,11 +130,23 @@ try {
     $repoStat->getDataByCommiters($cList);
     print_r($cList);
 } catch (\Exception $e) {
-    echo $e->getMessage();
-    $SQL->updateState("issue", "proxy_error");
-    $SQL->updateState("wiki", "proxy_error");
-    $SQL->updateState("download", "proxy_error");
-    $SQL->updateState("vcs", "proxy_error");
+    //When exception occurs, ther may be 2 situtations
+    //  1. Proxy error
+    //  2. Cralwer is blocked/target web site is down
+    //So we have to test proxy's connectivity
+    if (WebUtility::testConnection($SQL->proxy) === true) {
+        $SQL->updateState("issue", "cannot_get_data");
+        $SQL->updateState("wiki", "cannot_get_data");
+        $SQL->updateState("download", "cannot_get_data");
+        $SQL->updateState("vcs", "cannot_get_data");
+    } else {
+       $SQL->updateState("issue", "proxy_error");
+        $SQL->updateState("wiki", "proxy_error");
+        $SQL->updateState("download", "proxy_error");
+        $SQL->updateState("vcs", "proxy_error");
+    }
+
+    echo $e->getMessage(); 
     exit();
 }
     
