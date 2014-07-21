@@ -143,7 +143,7 @@ class SQLService
      */
     public function checkIssue(Issue $issue)
     {
-        if((int)$this->lastData["issue_topic"] < (int)$issue->topic) {
+        if ((int)$this->lastData["issue_topic"] < (int)$issue->topic) {
             return false;
         }
         return true;

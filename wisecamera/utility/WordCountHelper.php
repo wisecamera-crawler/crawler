@@ -69,7 +69,7 @@ class WordCountHelper
         $str3 = preg_replace('#([0-9]+([,][0-9]+)+)#i', "", $str2);
 
         // handle of  aaaa-b
-        preg_match_all('#([A-Za-z]+([-][A-Za-z]+)+)#i',$str3,$match);
+        preg_match_all('#([A-Za-z]+([-][A-Za-z]+)+)#i', $str3, $match);
         $count4 = sizeof($match[0]);
         $str4 = preg_replace('#([A-Za-z]+([-][A-Za-z]+)+)#i', "", $str3);
 

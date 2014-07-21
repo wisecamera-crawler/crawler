@@ -182,14 +182,13 @@ function work()
             $SQL->updateState("download", "cannot_get_data");
             $SQL->updateState("vcs", "cannot_get_data");
         } else {
-           $SQL->updateState("issue", "proxy_error");
+            $SQL->updateState("issue", "proxy_error");
             $SQL->updateState("wiki", "proxy_error");
             $SQL->updateState("download", "proxy_error");
             $SQL->updateState("vcs", "proxy_error");
         }
 
-        echo $e->getMessage(); 
+        echo $e->getMessage();
         exit();
     }
 }
-
