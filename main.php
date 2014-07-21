@@ -28,6 +28,7 @@ use wisecamera\utility\SQLService;
 use wisecamera\utility\Conneciotn;
 use wisecamera\utility\WebUtility;
 use wisecamera\utility\ParseUtility;
+use wisecamera\utility\Logger;
 use wisecamera\utility\DTOs\Download;
 use wisecamera\utility\DTOs\Issue;
 use wisecamera\utility\DTOs\Rating;
@@ -96,12 +97,13 @@ $cList = array();
 $repoType = "";
 
 $count = 3;
-//work
+$logger =  new Logger("retry.log");
 while ($count > 0) {
     work();
     if ($SQL->checkIssue($issue) === false) {
         --$count;
         $webCrawler = WebCrawlerFactory::factory($url);
+        $logger->append("$id : $url\n");
     } else {
         break;
     }

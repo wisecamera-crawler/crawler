@@ -6,7 +6,6 @@
  *
  * LICENSE : none
  *
- * @dependency DTO.php
  * @author   Poyu Chen <poyu677@gmail.com>
  */
 namespace wisecamera\utility;
