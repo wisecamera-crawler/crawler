@@ -135,20 +135,105 @@ class SQLService
     /**
      * checkIssue
      *
-     * This function check issue object's data is resonable
+     * This function check issue object's data is resonable and 
+     * comapre to lastData(lasttime's result) and update the state
      *
      * @param Issue $issue  The issue object to check
      *
-     * @return boolean  true for OK
+     * @return boolean  true for reasonable
      */
     public function checkIssue(Issue $issue)
     {
         if ((int)$this->lastData["issue_topic"] < (int)$issue->topic) {
+            $this->updateState("issue", "can_not_resolve");
             return false;
+        } elseif (
+            (int)$this->lastData["issue_topic"] != (int)$issue->topic
+            or (int)$this->lastData["issue_post"] != (int)$issue->article
+            or (int)$this->lastData["issue_user"] != (int)$issue->account
+        ) {
+            $this->updateState("issue", "success_update");
+        } else {
+            $this->updateState("issue", "no_change");
+        }
+        return true;
+    }
+    
+    /**
+     * checkWiki
+     *
+     * This function check wiki object's data is resonable and 
+     * comapre to lastData(lasttime's result) and update the state
+     *
+     * @param Wiki $wiki  The wiki object to check
+     *
+     * @return boolean  true for reasonable
+     */
+    public function checkWiki(Wiki $wiki)
+    {
+        if ((int)$this->lastData["wiki_pages"] != (int)$wiki->pages or
+            (int)$this->lastData["wiki_line"] != (int)$wiki->line or
+            (int)$this->lastData["wiki_word"] != (int)$wiki->word or
+            (int)$this->lastData["wiki_update"] != (int)$wiki->update) {
+             $this->updateState("wiki", "success_update");
+        } else {
+            $this->updateState("wiki", "no_change");
         }
         return true;
     }
 
+    /**
+     * checkVCS
+     *
+     * This function check vcs object's data is resonable and 
+     * comapre to lastData(lasttime's result) and update the state
+     *
+     * @param VCS $vcs  The VCS object to check
+     *
+     * @return boolean  true for reasonable
+     */
+    public function checkVCS(VCS $vcs)
+    {
+        if ((int)$this->lastData["vcs_commit"] != (int)$vcs->commit or
+            (string)$this->lastData["vcs_size"] != (string)$vcs->size or
+            (int)$this->lastData["vcs_line"] != (int)$vcs->line or
+            (int)$this->lastData["vcs_user"] != (int)$vcs->user or
+            (int)$this->lastData["vcs_file"] != (int)$vcs->file
+        ) {
+            $this->updateState("vcs", "success_update");
+        } else {
+            $this->updateState("vcs", "no_change");
+        }
+        return true;
+    }
+
+    /**
+     * checkVCS
+     *
+     * This function check download object's data is resonable and 
+     * comapre to lastData(lasttime's result) and update the state
+     *
+     * @param array $downloads  The array of Download object to check
+     *
+     * @return boolean  true for reasonable
+     */
+    public function checkDownload(array $downloads)
+    {
+        $dlCount = 0;
+        $dlFile = 0;
+        foreach ($downloads as $download) {
+            $dlFile += 1;
+            $dlCount += $download->count;
+        }
+
+        if ((int)$this->lastData["dl_file"] != (int)$dlFile or
+            (int)$this->lastData["dl_count"] != (int)$dlCount) {
+            $this->updateState("download", "success_update");
+        } else {
+            $this->updateState("download", "no_change");
+        }
+        return true;
+    }
     /**
      * insertIssue
      *
@@ -161,13 +246,6 @@ class SQLService
     public function insertIssue(Issue $issue)
     {
         $this->setupDBConnection();
-
-        if ((int)$this->lastData["issue_topic"] != (int)$issue->topic
-            or (int)$this->lastData["issue_post"] != (int)$issue->article
-            or (int)$this->lastData["issue_user"] != (int)$issue->account
-        ) {
-            $this->issueState = "success_update";
-        }
 
         $this->connection->query(
             "INSERT INTO `issue`
@@ -184,7 +262,6 @@ class SQLService
             WHERE `project_id` = '$this->projectId'"
         );
     }
-
     /**
      * insertWiki
      *
@@ -197,13 +274,7 @@ class SQLService
     public function insertWiki(Wiki $wiki)
     {
         $this->setupDBConnection();
-
-        if ((int)$this->lastData["wiki_pages"] != (int)$wiki->pages or
-            (int)$this->lastData["wiki_line"] != (int)$wiki->line or
-            (int)$this->lastData["wiki_word"] != (int)$wiki->word or
-            (int)$this->lastData["wiki_update"] != (int)$wiki->update) {
-            $this->wikiState = "success_update";
-        }
+        $this->checkWiki($wiki);
 
         $this->connection->query(
             "INSERT INTO `wiki` (`project_id`, `pages`, `line`, `word`, `update`)
@@ -234,16 +305,8 @@ class SQLService
     public function insertVCS(VCS $vcs)
     {
         $this->setupDBConnection();
-
-        if ((int)$this->lastData["vcs_commit"] != (int)$vcs->commit or
-            (string)$this->lastData["vcs_size"] != (string)$vcs->size or
-            (int)$this->lastData["vcs_line"] != (int)$vcs->line or
-            (int)$this->lastData["vcs_user"] != (int)$vcs->user or
-            (int)$this->lastData["vcs_file"] != (int)$vcs->file
-        ) {
-            $this->vcsState = "success_update";
-        }
-
+        $this->checkVCS($vcs);
+       
         $this->connection->query(
             "INSERT INTO `vcs`
                 (`project_id`, `commit`, `file`, `line`, `size`, `user`)
@@ -287,10 +350,7 @@ class SQLService
         }
         $valueString = substr($valueString, 0, -1);
 
-        if ((int)$this->lastData["dl_file"] != (int)$dlFile or
-            (int)$this->lastData["dl_count"] != (int)$dlCount) {
-            $this->downloadState = "success_update";
-        }
+        $this->checkDownload($downloads);
 
         $this->connection->query(
             "INSERT INTO `download`

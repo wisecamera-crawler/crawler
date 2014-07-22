@@ -100,7 +100,11 @@ $count = 3;
 $logger =  new Logger("retry.log");
 while ($count > 0) {
     work();
-    if ($SQL->checkIssue($issue) === false) {
+    if ($SQL->checkIssue($issue) === false or
+        $SQL->checkWiki($wiki) === false or
+        $SQL->checkVCS($vcs) === false or
+        $SQL->checkDownload($dlArray) === false
+    ) {
         --$count;
         $webCrawler = WebCrawlerFactory::factory($url);
         $logger->append("$id : $url\n");
@@ -111,7 +115,6 @@ while ($count > 0) {
 
 if ($count == 0) {
     echo "Some error occurs";
-    $SQL->updateState("issue", "can_not_resolve");
     exit();
 }
 
