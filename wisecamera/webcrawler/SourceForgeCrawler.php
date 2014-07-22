@@ -76,7 +76,10 @@ class SourceForgeCrawler extends WebCrawler
             $authors=array();
             $total_issue=$total_array[1][0];
             preg_match_all('/<td><a href="\/p\/.*\/bugs\/\d*\/">(\d*)<\/a><\/td>/', $issueMainPage, $issue_array);
-        
+            preg_match_all('/<td class=".*open.*">.*open.*<\/td>/', $issueMainPage, $open_array);
+            preg_match_all('/<td class=".*close.*">.*close.*<\/td>/', $issueMainPage, $close_array);
+            $issue->open+=sizeof($open_array[0]);
+            $issue->close+=sizeof($close_array[0]);
             foreach ($issue_array[1] as $current_issue_no) {
                 $comments+=$this->traverseIssues(
                     "http://sourceforge.net/p/$this->id/bugs",
@@ -95,6 +98,10 @@ class SourceForgeCrawler extends WebCrawler
                 }
                 sleep(2);
                 preg_match_all('/<td><a href="\/p\/.*\/bugs\/\d*\/">(\d*)<\/a><\/td>/', $issueMainPage, $issue_array);
+                preg_match_all('/<td class=".*open.*">.*open.*<\/td>/', $issueMainPage, $open_array);
+                preg_match_all('/<td class=".*close.*">.*close.*<\/td>/', $issueMainPage, $close_array);
+                $issue->open+=sizeof($open_array[0]);
+                $issue->close+=sizeof($close_array[0]);
                 foreach ($issue_array[1] as $current_issue_no) {
                     $comments+=$this->traverseIssues(
                         "http://sourceforge.net/p/$this->id/bugs",
