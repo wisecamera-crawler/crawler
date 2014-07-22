@@ -46,36 +46,27 @@ if ($argc != 2) {
 
 $webCrawler = WebCrawlerFactory::factory($argv[1]);
 
-if (WebUtility::getErrCode() == 0) {
-    $issue = new Issue();
-    $webCrawler->getIssue($issue);
-    
-    echo "Issue:\n";
-    print_r($issue);
-}
+$issue = new Issue();
+$webCrawler->getIssue($issue);
 
-if (WebUtility::getErrCode() == 0) {
-    $wiki = new Wiki();
-    $wikiList = array();
-    $webCrawler->getWiki($wiki, $wikiList);
-    
-    echo "Wiki:\n";
-    print_r($wiki);
-    print_r($wikiList);
-}
+echo "Issue:\n";
+print_r($issue);
 
-if (WebUtility::getErrCode() == 0) {
-    $rank = new Rating();
-    $webCrawler->getRating($rank);
-    
-    echo "rating:\n";
-    print_r($rank);
-}
+$wiki = new Wiki();
+$wikiList = array();
+$webCrawler->getWiki($wiki, $wikiList);
 
-if (WebUtility::getErrCode() == 0) {
-    $dlArray = array();
-    $webCrawler->getDownload($dlArray);
-    
-    echo "download : \n";
-    print_r($dlArray);
-}
+echo "Wiki:\n";
+print_r($wiki);
+print_r($wikiList);
+
+$rank = new Rating();
+$webCrawler->getRating($rank);
+
+echo "rating:\n";
+print_r($rank);
+$dlArray = array();
+$webCrawler->getDownload($dlArray);
+
+echo "download : \n";
+print_r($dlArray);
