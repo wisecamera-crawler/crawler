@@ -136,7 +136,7 @@ $SQL->insertVCSCommiters($cList);
 function work()
 {
     global $issue, $wiki, $wikiList, $rank, $dlArray, $vcs, $cList, $repoType;
-    global $webCrawler, $id;
+    global $webCrawler, $id, $SQL;
 
     try {
         $webCrawler->getIssue($issue);
