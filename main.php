@@ -72,18 +72,17 @@ SQLService::$db = $config->getValue("dbname");
 
 $SQL = new SQLService($id);
 if ($SQL->proxy == "") {
-    echo "No Proxy\n";
+    echo "No Available proxy, abort execution\n";
     return;
 }
 
 $url = $SQL->getProjectInfo("url");
 
 if ($url == null) {
-    echo "URL is null\n";
+    echo "URL is null, the project id may be worng\n";
     return;
 }
 
-//analysis web pages
 $webCrawler = WebCrawlerFactory::factory($url);
 
 //create DTOs
@@ -96,27 +95,9 @@ $vcs = new VCS();
 $cList = array();
 $repoType = "";
 
-$count = 3;
+$executionCounter = 3;
 $logger =  new Logger("retry.log");
-while ($count > 0) {
-    work();
-    if ($SQL->checkIssue($issue) === false or
-        $SQL->checkWiki($wiki) === false or
-        $SQL->checkVCS($vcs) === false or
-        $SQL->checkDownload($dlArray) === false
-    ) {
-        --$count;
-        $webCrawler = WebCrawlerFactory::factory($url);
-        $logger->append("$id : $url\n");
-    } else {
-        break;
-    }
-}
-
-if ($count == 0) {
-    echo "Some error occurs";
-    exit();
-}
+work();
 
 //insert into DB
 $SQL->insertVCSType($repoType);
@@ -135,8 +116,17 @@ $SQL->insertVCSCommiters($cList);
  */
 function work()
 {
+    global $executionCounter;
     global $issue, $wiki, $wikiList, $rank, $dlArray, $vcs, $cList, $repoType;
-    global $webCrawler, $id, $SQL;
+    global $webCrawler, $id, $SQL, $url;
+
+    -- $executionCounter;
+    //exceed retry limits, abort
+    if ($executionCounter == 0) {
+        exit();
+    }
+
+    echo "Execution tries left $executionCounter times ...\n";
 
     try {
         $webCrawler->getIssue($issue);
@@ -192,6 +182,22 @@ function work()
         }
 
         echo $e->getMessage();
-        exit();
+        retry();
     }
+
+    if ($SQL->checkIssue($issue) === false or
+        $SQL->checkWiki($wiki) === false or
+        $SQL->checkVCS($vcs) === false or
+        $SQL->checkDownload($dlArray) === false
+    ) {
+        retry();
+   } 
+}
+
+function retry()
+{
+    global $logger, $id, $url, $webCrawler;
+    $webCrawler = WebCrawlerFactory::factory($url);
+    $logger->append("$id : $url\n");
+    work();
 }
