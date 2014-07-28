@@ -144,7 +144,7 @@ class SQLService
      */
     public function checkIssue(Issue $issue)
     {
-        if ((int)$this->lastData["issue_topic"] < (int)$issue->topic) {
+        if ((int)$this->lastData["issue_topic"] > (int)$issue->topic) {
             $this->updateState("issue", "can_not_resolve");
             return false;
         } elseif (
