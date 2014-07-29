@@ -17,7 +17,7 @@ use wisecamera\utility\DTOs\Issue;
 use wisecamera\utility\DTOs\Rating;
 use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
-use wisecamera\utility\WebUtility;
+use wisecamera\utility\Connection;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\WordCountHelper;
 
@@ -575,9 +575,11 @@ class GoogleCodeCrawler extends WebCrawler
 
     public function getRepoUrl(&$type, &$url)
     {
-        $html = WebUtility::getHtmlContent(
+        $con = new Connection();
+        $html = $con->getHtmlContent(
             $this->baseUrl . "source/checkout"
         );
+        
         preg_match('/<tt id="checkoutcmd">.*<\/tt>/', $html, $matches);
         $command =  strip_tags($matches[0]);
         $splitCommand = explode(" ", $command);
