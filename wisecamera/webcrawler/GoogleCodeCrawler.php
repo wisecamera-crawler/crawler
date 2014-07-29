@@ -17,7 +17,7 @@ use wisecamera\utility\DTOs\Issue;
 use wisecamera\utility\DTOs\Rating;
 use wisecamera\utility\DTOs\Wiki;
 use wisecamera\utility\DTOs\WikiPage;
-use wisecamera\utility\Connection;
+use wisecamera\utility\WebUtility;
 use wisecamera\utility\ParseUtility;
 use wisecamera\utility\WordCountHelper;
 
@@ -33,8 +33,7 @@ class GoogleCodeCrawler extends WebCrawler
     private $totalDownload = 0;
     private $totalIssues = 0; // 總total issue數
     private $totalIssuesDiscuss = 0; // 所有issue 討論總數
-    private $user_agent =
-        'Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
+    private $user_agent = 'Mozilla/5.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.0.3705; .NET CLR 1.1.4322)';
     private $blockTagAry = array();
     private $issueReplyAuthor = array();
 
@@ -48,21 +47,15 @@ class GoogleCodeCrawler extends WebCrawler
     *  $this->blockTagAry: 斷行html tag
     *
     **/
-    public function __construct($url, $proxy = null)
+    public function __construct($url)
     {
         $arr = explode("/", $url);
         $projectName = $arr[4];
         $this->projectName = $projectName;
         $this->baseUrl = $this->baseUrl.$projectName.'/';
-        $this->baseIssueUrl = $this->baseUrl .
-            'issues/list?can=1&q=&colspec=ID+Type+Status+Priority+Milestone+Owner+Summary';
-        $this->baseDownloadUrl = $this->baseUrl .
-            'downloads/list?can=1&q=&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount';
-        $this->baseLoginUrl =
-            'https://accounts.google.com/ServiceLogin?service=code&ltmpl=phosting&continue=' .
-            'https%3A%2F%2Fcode.google.com%2Fp%2F' .
-            $this->projectName . '%2F&followup=https%3A%2F%2Fcode.google.com%2Fp%2F' .
-            $this->projectName.'%2F';
+        $this->baseIssueUrl = $this->baseUrl.'issues/list?can=1&q=&colspec=ID+Type+Status+Priority+Milestone+Owner+Summary';
+        $this->baseDownloadUrl = $this->baseUrl.'downloads/list?can=1&q=&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount';
+        $this->baseLoginUrl = 'https://accounts.google.com/ServiceLogin?service=code&ltmpl=phosting&continue=https%3A%2F%2Fcode.google.com%2Fp%2F'.$this->projectName.'%2F&followup=https%3A%2F%2Fcode.google.com%2Fp%2F'.$this->projectName.'%2F';
         $this->blockTagAry = array(
             0 => "p",   1 => "li",   2 => "h1",   3 => "h2",  4 => "h3",
             5 => "h4",  6 => "h5",  7 => "h6", 8 => "pre", 9 => "tr",
@@ -72,10 +65,6 @@ class GoogleCodeCrawler extends WebCrawler
         curl_setopt($this->ch, CURLOPT_USERAGENT, $this->user_agent);
         curl_setopt($this->ch, CURLOPT_HEADER, 0);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
-        if ($proxy !== null) {
-            curl_setopt($this->ch, CURLOPT_PROXY, $proxy);
-        }
-        $this->conn = new Connection($proxy);
     }
 
     /**
@@ -210,7 +199,7 @@ class GoogleCodeCrawler extends WebCrawler
     **/
     private function curlDownloadTotal()
     {
-        curl_setopt($this->ch, CURLOPT_URL, $this->baseDownloadUrl);
+        curl_setopt($this->ch, CURLOPT_URL,   $this->baseDownloadUrl);
 
         $this->html = '';
         $this->html = curl_exec($this->ch);
@@ -442,6 +431,8 @@ class GoogleCodeCrawler extends WebCrawler
         $idExplodStr = 'vt id '.$classNameAry[0];
         $statusExplodStr = 'vt '.$classNameAry[2];
         $dataInterval = 99;
+        $open = 0;
+        $close = 0;
         $status = array();
 
         for ($i = 0; $i < $this->totalIssues; $i += $dataInterval) {
@@ -454,8 +445,6 @@ class GoogleCodeCrawler extends WebCrawler
             $tmpID = explode($idExplodStr, $this->html);
             $tmpStatus = explode($statusExplodStr, $this->html);
 
-            $open = 0;
-            $close = 0;
             for ($j = 1; $j <  count($tmpStatus); $j++) {
 
                 $tmpIDAry = explode('</a>', $tmpID[$j]);
@@ -470,7 +459,10 @@ class GoogleCodeCrawler extends WebCrawler
                 if (! strcmp(trim($tmpStatusAry2[2]), "New")) {
                     $statusStr = "open";
                     ++$open;
-                } else {
+                }  else if (! strcmp(trim($tmpStatusAry2[2]), "Accepted")) {
+                    $statusStr = "open";
+                    ++$open;
+                }  else {
                     $statusStr = "close";
                     ++$close;
                 }
@@ -485,7 +477,6 @@ class GoogleCodeCrawler extends WebCrawler
         }
 
         $issue->topic = $this->totalIssues;
-        //echo "total issues: ".$this->totalIssues;
         $issue->open = $open;
         $issue->close = $close;
         //TODO: total account and articles?
@@ -584,7 +575,7 @@ class GoogleCodeCrawler extends WebCrawler
 
     public function getRepoUrl(&$type, &$url)
     {
-        $html = $this->conn->getHtmlContent(
+        $html = WebUtility::getHtmlContent(
             $this->baseUrl . "source/checkout"
         );
         preg_match('/<tt id="checkoutcmd">.*<\/tt>/', $html, $matches);
