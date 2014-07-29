@@ -24,13 +24,14 @@ class GitHubIssue
 {
     /**
      * baseurl      The base url for assigned issue page
-     * mainPageHtml The html content of basurl.
+     * issuePageHtml The html content of basurl.
      *
      * The baseurl of Github issue should be :
      *  https://github.com/<owner>/<project>/issues
      */
     private $baseurl;
-    private $mainPageHtml;
+    private $issuePageHtml;
+    private $pullPageHtml;
 
     /**
      * Connection object
@@ -48,8 +49,9 @@ class GitHubIssue
     public function __construct($url, $conn)
     {
         $this->conn = $conn;
-        $this->baseurl = $url;
-        $this->mainPageHtml = $this->conn->getHtmlContent($url);
+        $this->baseurl = $url . "/issues";
+        $this->issuePageHtml = $this->conn->getHtmlContent($url . "/issues");
+        $this->pullPageHtml = $this->conn->getHtmlContent($url . "/pulls");
     }
 
     /**
@@ -73,10 +75,13 @@ class GitHubIssue
      */
     public function getOpenIssue()
     {
-        preg_match('/([0-9],?)+ Open/', $this->mainPageHtml, $matches);
+        preg_match('/([0-9],?)+ Open/', $this->issuePageHtml, $matches);
         $arr = explode(' ', $matches[0]);
 
-        return ParseUtility::intStrToInt($arr[0]);
+        preg_match('/([0-9],?)+ Open/', $this->pullPageHtml, $matches);
+        $arr2 = explode(' ', $matches[0]);
+
+        return ParseUtility::intStrToInt($arr[0]) + ParseUtility::intStrToInt($arr2[0]);
     }
 
     /**
@@ -88,10 +93,13 @@ class GitHubIssue
      */
     public function getCloseIssue()
     {
-        preg_match('/([0-9],?)+ Closed/', $this->mainPageHtml, $matches);
+        preg_match('/([0-9],?)+ Closed/', $this->issuePageHtml, $matches);
         $arr = explode(' ', $matches[0]);
 
-        return ParseUtility::intStrToInt($arr[0]);
+        preg_match('/([0-9],?)+ Closed/', $this->pullPageHtml, $matches);
+        $arr2 = explode(' ', $matches[0]);
+
+        return ParseUtility::intStrToInt($arr[0]) + ParseUtility::intStrToInt($arr2[0]);
     }
 
     /**
