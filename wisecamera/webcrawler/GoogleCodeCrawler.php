@@ -53,7 +53,7 @@ class GoogleCodeCrawler extends WebCrawler
         $projectName = $arr[4];
         $this->projectName = $projectName;
         $this->baseUrl = $this->baseUrl.$projectName.'/';
-        $this->baseIssueUrl = $this->baseUrl.'issues/list?can=1&q=&colspec=ID+Type+Status+Priority+Milestone+Owner+Summary';
+        $this->baseIssueUrl = $this->baseUrl.'issues/list?can=1&q=has%3AStatus&colspec=ID+Type+Status+Priority+Milestone+Owner+Summary';
         $this->baseDownloadUrl = $this->baseUrl.'downloads/list?can=1&q=&colspec=Filename+Summary+Uploaded+ReleaseDate+Size+DownloadCount';
         $this->baseLoginUrl = 'https://accounts.google.com/ServiceLogin?service=code&ltmpl=phosting&continue=https%3A%2F%2Fcode.google.com%2Fp%2F'.$this->projectName.'%2F&followup=https%3A%2F%2Fcode.google.com%2Fp%2F'.$this->projectName.'%2F';
         $this->blockTagAry = array(
@@ -166,7 +166,19 @@ class GoogleCodeCrawler extends WebCrawler
         $tmp2 = explode('<a', $tmp[1]);
         $this->totalIssues = trim($tmp2[0]);
     }
+    
+    public function curlIssuesTotals($url)
+    {
+        curl_setopt($this->ch, CURLOPT_URL, $url);
 
+        $this->html = '';
+        $this->html = curl_exec($this->ch);
+        $firstCut = explode('<div class="pagination">', $this->html);
+        $tmp = explode('of ', $firstCut[1]);
+        $tmp2 = explode('<a', $tmp[1]);
+        return trim($tmp2[0]);
+    }
+    
     /**
     *   取得issue page的css clase名稱
     *
@@ -430,21 +442,23 @@ class GoogleCodeCrawler extends WebCrawler
         $classNameAry = $this->curlIssuesClassName();
         $idExplodStr = 'vt id '.$classNameAry[0];
         $statusExplodStr = 'vt '.$classNameAry[2];
-        $dataInterval = 99;
+        $dataInterval = 100;
         $open = 0;
         $close = 0;
-        $status = array();
-
+        $actualTotalIssues = 0;
+        // $status = array();
+        
         for ($i = 0; $i < $this->totalIssues; $i += $dataInterval) {
             $url = $this->baseIssueUrl ."&num=$dataInterval&start=$i";
             curl_setopt($this->ch, CURLOPT_URL, $url);
-
+            
             $this->html = '';
             $this->html = curl_exec($this->ch);
 
             $tmpID = explode($idExplodStr, $this->html);
             $tmpStatus = explode($statusExplodStr, $this->html);
-
+            $actualTotalIssues += count($tmpStatus);
+            
             for ($j = 1; $j <  count($tmpStatus); $j++) {
 
                 $tmpIDAry = explode('</a>', $tmpID[$j]);
@@ -454,7 +468,6 @@ class GoogleCodeCrawler extends WebCrawler
 
                 $tmpStatusAry = explode('</a>', $tmpStatus[$j]);
                 $tmpStatusAry2 = explode('>', $tmpStatusAry[0]);
-                $idx = count($status);
 
                 if (! strcmp(trim($tmpStatusAry2[2]), "New")) {
                     $statusStr = "open";
@@ -467,7 +480,7 @@ class GoogleCodeCrawler extends WebCrawler
                     ++$close;
                 }
 
-                $status[] = trim($tmpStatusAry2[2]);
+                // $status[] = trim($tmpStatusAry2[2]);
 
                 unset($tmpIDAry);
                 unset($tmpIDAry2);
@@ -475,8 +488,9 @@ class GoogleCodeCrawler extends WebCrawler
                 unset($tmpStatusAry2);
             }
         }
-
-        $issue->topic = $this->totalIssues;
+        
+        $this->totalIssues = $actualTotalIssues;
+        $issue->topic = $actualTotalIssues;
         $issue->open = $open;
         $issue->close = $close;
         //TODO: total account and articles?
