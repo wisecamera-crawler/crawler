@@ -457,7 +457,7 @@ class GoogleCodeCrawler extends WebCrawler
 
             $tmpID = explode($idExplodStr, $this->html);
             $tmpStatus = explode($statusExplodStr, $this->html);
-            $actualTotalIssues += count($tmpStatus);
+            $actualTotalIssues += count($tmpStatus) - 1;
             
             for ($j = 1; $j <  count($tmpStatus); $j++) {
 
