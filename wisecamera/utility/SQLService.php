@@ -344,7 +344,7 @@ class SQLService
         $dlFile = 0;
         foreach ($downloads as $download) {
             $valueString .= "('$download->url', '$this->projectId',
-                '$download->name', '$download->count'),";
+                '". str_replace("'", "\'", $download->name) ."', '$download->count'),";
             $dlFile += 1;
             $dlCount += $download->count;
         }
@@ -380,8 +380,9 @@ class SQLService
 
         $valueString = "VALUES";
         foreach ($commiters as $commiter) {
-            $valueString .= "('$commiter->commiter', '$this->projectId',
-                '$commiter->modify', '$commiter->delete', '$commiter->new'),";
+            $valueString .= "('". str_replace("'", "\'", $commiter->commiter) .
+                "', '$this->projectId', '$commiter->modify',
+                '$commiter->delete', '$commiter->new'),";
         }
         $valueString = substr($valueString, 0, -1);
 
