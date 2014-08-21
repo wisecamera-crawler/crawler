@@ -63,7 +63,7 @@ class GitHubCrawler extends WebCrawler
      */
     public function getIssue(Issue & $issue)
     {
-        $gi = new GitHubIssue($this->baseUrl , $this->conn);
+        $gi = new GitHubIssue($this->baseUrl, $this->conn);
         $issue->open = $gi->getOpenIssue();
         $issue->close =  $gi->getCloseIssue();
         $issue->topic = $gi->getTotalIssue();

@@ -211,7 +211,7 @@ class GoogleCodeCrawler extends WebCrawler
     **/
     private function curlDownloadTotal()
     {
-        curl_setopt($this->ch, CURLOPT_URL,   $this->baseDownloadUrl);
+        curl_setopt($this->ch, CURLOPT_URL, $this->baseDownloadUrl);
 
         $this->html = '';
         $this->html = curl_exec($this->ch);
@@ -472,10 +472,10 @@ class GoogleCodeCrawler extends WebCrawler
                 if (! strcmp(trim($tmpStatusAry2[2]), "New")) {
                     $statusStr = "open";
                     ++$open;
-                }  else if (! strcmp(trim($tmpStatusAry2[2]), "Accepted")) {
+                } else if (! strcmp(trim($tmpStatusAry2[2]), "Accepted")) {
                     $statusStr = "open";
                     ++$open;
-                }  else {
+                } else {
                     $statusStr = "close";
                     ++$close;
                 }

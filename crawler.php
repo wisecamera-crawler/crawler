@@ -120,11 +120,11 @@ function work()
     global $issue, $wiki, $wikiList, $rank, $dlArray, $vcs, $cList, $repoType;
     global $webCrawler, $id, $SQL, $url;
 
-    -- $executionCounter;
     //exceed retry limits, abort
     if ($executionCounter == 0) {
         exit();
     }
+    -- $executionCounter;
 
     echo "Execution tries left $executionCounter times ...\n";
 
@@ -191,7 +191,7 @@ function work()
         $SQL->checkDownload($dlArray) === false
     ) {
         retry();
-   } 
+    }
 }
 
 function retry()
