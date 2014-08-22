@@ -7,7 +7,7 @@ crawler
 * 匯入DB (注意resource中的DB file 為資料表，須先建立`nsc`資料庫)
 
 ### 主程式
-`php main.php <project-id>`
+`php crawler.php <project-id>`
 
 * project-id DB中專案之ID
 
@@ -24,13 +24,10 @@ crawler
 
 * url 專案之首頁，會透過webcrawler解析repo url 
 
-### TODO
-Important
-* CVS 分析 : 目前對CVS repo沒法解析url 無法進行分析
+proxycheck
+======
 
-ERROR control
-* DB error
-* cannot get/resolve file
+php proxyCheck.php > /dev/null &
 
-Other Issue
-* WebUtiltiy.php => persistent connetction?  other issue
+啟動後會依序檢查Proxy Server狀態、專案排程表以及執行中的專案狀態php proxyCheck.php > /dev/null &
+
