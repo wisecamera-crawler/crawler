@@ -60,6 +60,12 @@ class ProxySQLService
         $this->conn = new PDO($dsn, ProxySQLService::$user, ProxySQLService::$password);
         $this->conn->query("SET CHARACTER SET utf8 ");
         $this->conn->query("SET NAMES utf8");
+        
+        //Set status to fail if there is `working` project
+        $this->conn->query(
+            "UPDATE `project` SET `status` = 'fail' WHERE `status` = 'working';"
+        );
+
     }
 
     /**
