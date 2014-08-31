@@ -36,7 +36,8 @@ class WebCrawlerFactory
     public static function factory($url)
     {
         if (strpos($url, "github") !== false) {
-            return new GitHubCrawler($url);
+         //   return new GitHubCrawler($url);
+            return new GitHubAPICrawler($url);
         }
 
         if (strpos($url, "openfoundry") !== false) {
