@@ -117,12 +117,23 @@ class GitHubIssue
         $issueCount = $this->getTotalIssue();
         $totalComments = 0;
         $authors = array();
+       // $issueCount = 1;
         for ($i = 1; $i <= $issueCount; ++$i) {
             $html = $this->conn->getHtmlContent($this->baseurl . "/" . $i);
             $totalComments += $this->getCommentCountInSingleIssuePage($html);
             $this->getAuthorCountInSingleIssuePage($html, $authors);
         }
         $totalAuthors = sizeof($authors);
+/*
+	$html = $this->conn->getHtmlContent($this->baseurl . "/128");
+		echo "HTML".$html;
+            $totalComments += $this->getCommentCountInSingleIssuePage($html);
+		echo "TOTALCOMMENTS".$totalComments."\n";
+	echo "URL".$this->baseurl . "/128\n";
+            $this->getAuthorCountInSingleIssuePage1($html, $authors);
+*/
+
+
     }
 
     /**
@@ -154,6 +165,7 @@ class GitHubIssue
      */
     private function getAuthorCountInSingleIssuePage($html, &$authorArr = null)
     {
+
         if ($authorArr == null) {
             $authorArr = array();
         }
@@ -162,7 +174,8 @@ class GitHubIssue
         $htmlArr = explode("\n", $html);
         $i = 0;
         foreach ($htmlArr as $line) {
-            if ($line === '        <div class="timeline-comment-header-text">') {
+           // if ($line === '        <div class="timeline-comment-header-text">') {
+            if ($line === '  <div class="timeline-comment-header-text">') {
                 $author = trim(strip_tags($htmlArr[$i+2] . $htmlArr[$i+3]));
                 $authorArr[$author] = 0;
                 $localAuthorArr[$author] = 0;
@@ -172,4 +185,26 @@ class GitHubIssue
 
         return sizeof($localAuthorArr);
     }
+  /*  private function getAuthorCountInSingleIssuePage1($html, &$authorArr = null)
+    {
+
+        if ($authorArr == null) {
+            $authorArr = array();
+        }
+        $localAuthorArr = array();
+
+        $htmlArr = explode("\n", $html);
+        $i = 0;
+        foreach ($htmlArr as $line) {
+            if ($line === '  <div class="timeline-comment-header-text">') {
+		echo "YYYYYYYYYYYYYYYY";
+                $author = trim(strip_tags($htmlArr[$i+2] . $htmlArr[$i+3]));
+                $authorArr[$author] = 0;
+                $localAuthorArr[$author] = 0;
+            }
+            ++$i;
+        }
+
+        return sizeof($localAuthorArr);
+    }*/
 }
