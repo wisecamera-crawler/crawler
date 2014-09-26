@@ -60,8 +60,6 @@ class ProxySystem
     /**
      * check the folder
      *
-     * @param integer $SMTPDebug
-     *
      * @category  Utility
      * @return    none
      */
@@ -78,33 +76,6 @@ class ProxySystem
         return $logDir;
     }
 
-    /**
-     * check the folder
-     *
-     * @param integer $SMTPDebug
-     *
-     * @category  Utility
-     * @return    none
-     */
-    public function checkPrg($prgArray = array(), $arrID, $fileTime, $SQL) {
 
-        $fp = fopen("log/" . $arrID . ".log", "w+");
-
-        if (count($prgArray) > 0) {
-            for ($i=0; $i < count($prgArray); $i++) {
-                $out = explode(" ", $prgArray[$i]);
-                $projectStatus = $SQL->getProjectStatus(trim($out[2]));
-                if ($projectStatus['status'] != 'working') {
-                    if ($projectStatus['last_update'] < $fileTime) {
-                        $SQL->updateProjectStatus(trim($out[2]), "working");
-                        exec($prgArray[$i] . " > /dev/null &");
-                    }
-                }
-                fputs($fp, $prgArray[$i] . chr(10));
-            }
-        }
-
-        fclose($fp);
-    }
 
 }

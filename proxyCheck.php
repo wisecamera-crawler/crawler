@@ -159,36 +159,35 @@ do {
 
         $schedule = $SQL->getSchedule();
         $proxyServer = new ProxyCheck();
-        $paramString = "";
 
         while ($rows = $schedule->fetch()) {
 
+            // combine SQL to $paramString
+            $paramString = '';
             switch ($rows['sch_type']) {
                 case "one_time":
                     $theDate = date('Y-m-d H:i:00');
                     $paramString = "`sch_type` = 'one_time' AND `time` = '" . $theDate . "'";
                     break;
                 default:
-                    $theDate = date('H:i:00');
-                    switch ($rows['sch_type']) {
-                        case "daily":
-                            $paramString = "`sch_type` = 'daily' AND `time` = '2012-01-01 " . $theDate . "'";
-                            break;
-                        case "weekly":
-                            $paramString = " `sch_type` = 'weekly' AND `time` = '2012-01-01 " . $theDate . "'"
-                                . " AND `schedule` = " . date('N');
-                            break;
+                    $theDate = date("H:i:00");
+                    if ($rows['sch_type'] == "daily") {
+                        $paramString = "`sch_type` = 'daily' AND `time` = '2012-01-01 " . $theDate . "'";
+                    } else {
+                        $paramString = " `sch_type` = 'weekly' AND `time` = '2012-01-01 " . $theDate . "'"
+                            . " AND `schedule` = " . date('N');
                     }
                     break;
             }
 
-            $result = $SQL->getScheduleParam($paramString);
+            if (!empty($paramString)) {
+                $result = $SQL->getScheduleParam($paramString);
+            }
 
 
             // 狀態為空的，或者為finish
             while ($arrRow = $result->fetch()) {
                 // status is empty or finish
-
                 $arrID = $arrRow['schedule_id'];
                 $updFile = "log/run/server/server::" . $arrID;
                 $sGroup = $SQL->getScheduleGroup($arrID);
@@ -201,9 +200,11 @@ do {
 
                 $logStart = fopen("log/save/" . $arrID . "_run_" . date('Ymd-His') .  ".log", "a+");
 
+
                 $time = $arrRow['time'];
                 $type = array();
                 $runVar = array();
+
 
                 while ($sGRow = $sGroup->fetch()) {
                     if ($sGRow['type'] == 'year' || $sGRow['type'] == 'group') {
@@ -242,7 +243,6 @@ do {
                         }
                         break;
                     case count($runVar) >= 1:
-                        // year or group
                         if ($type[0] == 'year' || $type[0] == 'group') {
                             if ($type[0] == 'year') {
                                 $runPrg[] = $runVar['year'];
@@ -262,17 +262,20 @@ do {
                             }
                         }
                         break;
-                    case (count($runVar) >= 1 && $type[0] == 'project'):
+                    default:
                         // project
-                        for ($i = 0; $i < count($runVar); $i++) {
-                            $project = $SQL->getProject($runVar[$i]);
-                            $projectID = ((ProxyCheck::$chkType == "project") ?
-                                $project['project_id'] : $project['url']);
-                            $runPrg2[] = ProxyCheck::$extraProgram . $projectID;
+                        if (count($runVar) >= 1 && $type[0] == 'project') {
+                            for ($i = 0; $i < count($runVar); $i++) {
+                                $project = $SQL->getProject($runVar[$i]);
+                                $projectID = ((ProxyCheck::$chkType == "project") ?
+                                    $project['project_id'] : $project['url']);
+                                $runPrg2[] = ProxyCheck::$extraProgram . $projectID;
+                            }
                         }
-
                         break;
                 }
+
+
 
                 if (count($runPrg1) == 0 && count($runPrg2) == 0 && count($runPrg3) == 0) {
 
@@ -291,25 +294,34 @@ do {
                     $fileTime = date("Y-m-d H:i", filemtime(dirname(__FILE__). "/log/" . $arrID . ".log"));
 
                     // schedule project
-
+                    $fp = fopen("log/" . $arrID . ".log", "w+");
 
                     $prgArray = array_merge($runPrg1, $runPrg2, $runPrg3);
 
-                    $ProxySystem->checkPrg($prgArray, $arrID, $fileTime, $SQL);
-
-                    foreach ($prgArray as $i => $prg) {
-                        fputs($logStart, $prg[$i]);
+                    if (count($prgArray) > 0) {
+                        for ($i=0; $i < count($prgArray); $i++) {
+                            $out = explode(" ", $prgArray[$i]);
+                            $projectStatus = $SQL->getProjectStatus(trim($out[2]));
+                            if ($projectStatus['status'] != 'working') {
+                                if ($projectStatus['last_update'] < $fileTime) {
+                                    $SQL->updateProjectStatus(trim($out[2]), "working");
+                                    exec($prgArray[$i] . " > /dev/null &");
+                                }
+                            }
+                            fputs($fp, $prgArray[$i] . chr(10));
+                            fputs($logStart, $prgArray[$i] . chr(10));
+                        }
                     }
+
+                    fclose($fp);
 
                     $updateSchedule = fopen("log/run/server/server::" . $arrID, "w+");
                     fwrite($updateSchedule, "work");
                     fclose($updateSchedule);
 
                     @mkdir("log/server/" . $arrID ."/");
-
                     copy('log/' . $arrID . ".log", 'log/run/' . $arrID . ".log");
                 }
-
 
                 fclose($logStart);
             }
@@ -392,7 +404,6 @@ do {
                             $checkRun = "work";
                             break;
                         }
-
                     }
                     fclose($updateSchedule);
 
@@ -404,8 +415,6 @@ do {
                             @unlink($logDir2 . $getLog[1] . ".log");
                         }
                     }
-
-
                 } else {
                     echo $getLog[1] . " finish" . chr(10);
                     $logRun = fopen("log/save/" .$getLog[1] . "_close_" . date('Ymd-His') .  ".log", "w+");
@@ -413,10 +422,8 @@ do {
                     fclose($logRun);
 
                     @unlink($logDir . $fileName);
-
                 }
             }
-
         }
 
     }
