@@ -288,6 +288,7 @@ do {
 
 
                 } else {
+
                     $fp = fopen("log/" . $arrID . ".log", "w+");
                     fputs($fp, '');
                     fclose($fp);
@@ -320,6 +321,7 @@ do {
                     fclose($updateSchedule);
 
                     @mkdir("log/server/" . $arrID ."/");
+
                     copy('log/' . $arrID . ".log", 'log/run/' . $arrID . ".log");
                 }
 
@@ -404,6 +406,7 @@ do {
                             $checkRun = "work";
                             break;
                         }
+
                     }
                     fclose($updateSchedule);
 
@@ -415,6 +418,8 @@ do {
                             @unlink($logDir2 . $getLog[1] . ".log");
                         }
                     }
+
+
                 } else {
                     echo $getLog[1] . " finish" . chr(10);
                     $logRun = fopen("log/save/" .$getLog[1] . "_close_" . date('Ymd-His') .  ".log", "w+");
@@ -422,8 +427,10 @@ do {
                     fclose($logRun);
 
                     @unlink($logDir . $fileName);
+
                 }
             }
+
         }
 
     }
