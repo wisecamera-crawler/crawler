@@ -180,10 +180,8 @@ do {
                     break;
             }
 
-            if (!empty($paramString)) {
-                $result = $SQL->getScheduleParam($paramString);
-            }
 
+            $result = $SQL->getScheduleParam($paramString);
 
             // 狀態為空的，或者為finish
             while ($arrRow = $result->fetch()) {
@@ -232,6 +230,10 @@ do {
                 $runPrg3 = array();
                 $runExec = "";
 
+
+                echo 'test 2' . chr(10);
+                echo $arrID . ' ' . count($runVar);
+
                 switch (count($runVar)) {
                     case 0:
                         // all
@@ -243,7 +245,14 @@ do {
                         }
                         break;
                     case count($runVar) >= 1:
-                        if ($type[0] == 'year' || $type[0] == 'group') {
+                        if ($type[0] == 'project') {
+                            for ($i = 0; $i < count($runVar); $i++) {
+                                $project = $SQL->getProject($runVar[$i]);
+                                $projectID = ((ProxyCheck::$chkType == "project") ?
+                                    $project['project_id'] : $project['url']);
+                                $runPrg2[] = ProxyCheck::$extraProgram . $projectID;
+                            }
+                        } else {
                             if ($type[0] == 'year') {
                                 $runPrg[] = $runVar['year'];
                             }
@@ -261,18 +270,7 @@ do {
                                         $prg3Rows['project_id'] : $prg3Rows['url']);
                             }
                         }
-                        break;
-                    default:
-                        // project
-                        if (count($runVar) >= 1 && $type[0] == 'project') {
-                            for ($i = 0; $i < count($runVar); $i++) {
-                                $project = $SQL->getProject($runVar[$i]);
-                                $projectID = ((ProxyCheck::$chkType == "project") ?
-                                    $project['project_id'] : $project['url']);
-                                $runPrg2[] = ProxyCheck::$extraProgram . $projectID;
-                            }
-                        }
-                        break;
+
                 }
 
 
