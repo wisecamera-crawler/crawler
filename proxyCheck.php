@@ -82,10 +82,6 @@ do {
                                 && (($thisDate[0] <= $chkCheck['last_update'])
                                     && $thisDate[1] >= $chkCheck['last_update'])) {
                                 $SQL->updateProjectStatus('working', $fileForDate[2]);
-                                $updateFileLog = fopen('rerun.log', 'a+');
-                                fputs($updateFileLog, $fileForDate[2] . " " . date('Y-m-d H:i') . " is rerun.");
-                                fclose($updateFileLog);
-                                echo $fileForDate[2] . " " . date('Y-m-d H:i') . " is rerun." . chr(10);
                                 exec(ProxyCheck::$extraProgram . $fileForDate[2]);
                             }
                         }
@@ -134,9 +130,8 @@ do {
         }
 
         $SQL->updateProxyStatus($proxy, $currStatus);
-        $fp = fopen($fileName, 'w+');
-        fwrite($fp, $currStatus);
-        fclose($fp);
+        $ProxySystem->currStatusLog($fileName, $currStatus);
+
     }
 
     $allProxyStatus = $SQL->proxyStatus();
@@ -195,10 +190,6 @@ do {
                 }
 
                 // get schedule id, project id
-
-                $logStart = fopen("log/save/" . $arrID . "_run_" . date('Ymd-His') .  ".log", "a+");
-
-
                 $time = $arrRow['time'];
                 $type = array();
                 $runVar = array();
@@ -230,9 +221,6 @@ do {
                 $runPrg3 = array();
                 $runExec = "";
 
-
-                echo 'test 2' . chr(10);
-                echo $arrID . ' ' . count($runVar);
 
                 switch (count($runVar)) {
                     case 0:
@@ -278,12 +266,7 @@ do {
                 if (count($runPrg1) == 0 && count($runPrg2) == 0 && count($runPrg3) == 0) {
 
                     // not schedule project
-                    $updateSchedule = fopen("log/run/server/server::" . $arrID, "w+");
-                    fwrite($updateSchedule, "not_exist");
-                    fclose($updateSchedule);
-
-                    fwrite($logStart, "not_exist");
-
+                    $ProxySystem->updateScheduleLog($arrID, 'not_exist');
 
                 } else {
 
@@ -308,22 +291,18 @@ do {
                                 }
                             }
                             fputs($fp, $prgArray[$i] . chr(10));
-                            fputs($logStart, $prgArray[$i] . chr(10));
+
                         }
                     }
 
                     fclose($fp);
 
-                    $updateSchedule = fopen("log/run/server/server::" . $arrID, "w+");
-                    fwrite($updateSchedule, "work");
-                    fclose($updateSchedule);
+                    $ProxySystem->updateScheduleLog($arrID, 'work');
 
                     @mkdir("log/server/" . $arrID ."/");
 
                     copy('log/' . $arrID . ".log", 'log/run/' . $arrID . ".log");
                 }
-
-                fclose($logStart);
             }
         }
     }
@@ -368,15 +347,11 @@ do {
                                     $SQL->updateProjectStatus($runProgram, 'fail');
                                     $SQL->updateCrawlerTimeOut($runProgram, $fileTime, date('Y-m-d H:i'));
 
-                                    $errLog = fopen("log/error.log", "a+");
                                     $errorMsgFirst = " 執行由" . $fileTime . "~" . date("Y-m-d H:i") . "已超過";
                                     $errorMsg = $cmdFile[2] . $errorMsgFirst . (ProxyCheck::$chkTime / 60) . "小時";
-                                    fputs($errLog, $errorMsg . chr(10));
-                                    fclose($errLog);
+                                    $ProxySystem->chkErrorLog($errorMsg . chr(10));
 
-                                    $updateSchedule = fopen("log/server/" . $getLog[1] . "/" . $cmdRun[2], "w+");
-                                    fwrite($updateSchedule, "time_out");
-                                    fclose($updateSchedule);
+                                    $ProxySystem->updateLog($getLog[1], $cmdRun[2], 'time_out');
 
                                     exec("ps aux | grep '$cmdLine' | awk '{print $2}' | xargs kill -9");
                                     Mailer::$msg = $errLog;
@@ -385,9 +360,9 @@ do {
                                     $mail->mailSend();
                                 }
                             } else {
-                                $updateSchedule = fopen("log/server/" . $getLog[1] . "/" . $cmdRun[2], "w+");
-                                fwrite($updateSchedule, "finish" . chr(10));
-                                fclose($updateSchedule);
+
+                                $ProxySystem->updateLog($getLog[1], $cmdRun[2], 'finish');
+
                             }
                         }
                     }
@@ -410,9 +385,7 @@ do {
 
                     if ($checkRun == 'finish') {
                         if (file_exists($logDir . $fileName)) {
-                            $updateSchedule = fopen($logDir . $fileName, "w+");
-                            fwrite($updateSchedule, "finish" . chr(10));
-                            fclose($updateSchedule);
+                            $ProxySystem->checkFinialLog($logDir . $fileName, 'finish');
                             @unlink($logDir2 . $getLog[1] . ".log");
                         }
                     }
@@ -420,10 +393,7 @@ do {
 
                 } else {
                     echo $getLog[1] . " finish" . chr(10);
-                    $logRun = fopen("log/save/" .$getLog[1] . "_close_" . date('Ymd-His') .  ".log", "w+");
-                    fputs($logRun, "finish");
-                    fclose($logRun);
-
+                    $ProxySystem->checkFinishLog($getLog[1], 'finish');
                     @unlink($logDir . $fileName);
 
                 }
