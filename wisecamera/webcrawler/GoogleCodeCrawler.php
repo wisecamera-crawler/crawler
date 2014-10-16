@@ -47,7 +47,7 @@ class GoogleCodeCrawler extends WebCrawler
     *  $this->blockTagAry: 斷行html tag
     *
     **/
-    public function __construct($url)
+    public function __construct($url, $proxy = null)
     {
         $arr = explode("/", $url);
         $projectName = $arr[4];
