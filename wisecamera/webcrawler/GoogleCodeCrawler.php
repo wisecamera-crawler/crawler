@@ -166,7 +166,7 @@ class GoogleCodeCrawler extends WebCrawler
         $tmp2 = explode('<a', $tmp[1]);
         $this->totalIssues = trim($tmp2[0]);
     }
-    
+
     public function curlIssuesTotals($url)
     {
         curl_setopt($this->ch, CURLOPT_URL, $url);
@@ -178,7 +178,7 @@ class GoogleCodeCrawler extends WebCrawler
         $tmp2 = explode('<a', $tmp[1]);
         return trim($tmp2[0]);
     }
-    
+
     /**
     *   取得issue page的css clase名稱
     *
@@ -220,7 +220,7 @@ class GoogleCodeCrawler extends WebCrawler
         $tmp2 = explode('</div>', $tmp[1]);
         $this->totalDownload = trim($tmp2[0]);
     }
-    
+
     /**
     *   取得download page的css clase名稱
     *
@@ -408,7 +408,7 @@ class GoogleCodeCrawler extends WebCrawler
 
             $url = $this->baseUrl.'wiki/'.$pageName[$idx];
             $content = $this->getWikiContent($url);
-         
+ 
             $wikiPage = new WikiPage();
             $wikiPage->url = $url;
             $wikiPage->title = $pageName[$idx];
@@ -447,18 +447,18 @@ class GoogleCodeCrawler extends WebCrawler
         $close = 0;
         $actualTotalIssues = 0;
         // $status = array();
-        
+
         for ($i = 0; $i < $this->totalIssues; $i += $dataInterval) {
             $url = $this->baseIssueUrl ."&num=$dataInterval&start=$i";
             curl_setopt($this->ch, CURLOPT_URL, $url);
-            
+
             $this->html = '';
             $this->html = curl_exec($this->ch);
 
             $tmpID = explode($idExplodStr, $this->html);
             $tmpStatus = explode($statusExplodStr, $this->html);
             $actualTotalIssues += count($tmpStatus) - 1;
-            
+
             for ($j = 1; $j <  count($tmpStatus); $j++) {
 
                 $tmpIDAry = explode('</a>', $tmpID[$j]);
@@ -472,7 +472,7 @@ class GoogleCodeCrawler extends WebCrawler
                 if (! strcmp(trim($tmpStatusAry2[2]), "New")) {
                     $statusStr = "open";
                     ++$open;
-                } else if (! strcmp(trim($tmpStatusAry2[2]), "Accepted")) {
+                } elseif (! strcmp(trim($tmpStatusAry2[2]), "Accepted")) {
                     $statusStr = "open";
                     ++$open;
                 } else {
@@ -488,7 +488,7 @@ class GoogleCodeCrawler extends WebCrawler
                 unset($tmpStatusAry2);
             }
         }
-        
+
         $this->totalIssues = $actualTotalIssues;
         $issue->topic = $actualTotalIssues;
         $issue->open = $open;
@@ -560,7 +560,7 @@ class GoogleCodeCrawler extends WebCrawler
             }
         }
     }
-    
+
     /**
     *   取得使用者評分
     *
@@ -593,7 +593,7 @@ class GoogleCodeCrawler extends WebCrawler
         $html = $con->getHtmlContent(
             $this->baseUrl . "source/checkout"
         );
-        
+
         preg_match('/<tt id="checkoutcmd">.*<\/tt>/', $html, $matches);
         $command =  strip_tags($matches[0]);
         $splitCommand = explode(" ", $command);

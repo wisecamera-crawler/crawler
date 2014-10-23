@@ -63,8 +63,8 @@ class ProxySystem
      * @category  Utility
      * @return    none
      */
-    public function checkLogDir() {
-
+    public function checkLogDir()
+    {
         $logDir = array('log/run/', 'log/run/server/', 'log/save/');
 
         foreach ($logDir as $directory) {
@@ -85,7 +85,8 @@ class ProxySystem
      * @category  Utility
      * @return    none
      */
-    public function currStatusLog($fileName, $currStatus) {
+    public function currStatusLog($fileName, $currStatus)
+    {
         $fp = fopen($fileName, 'w+');
         fwrite($fp, $currStatus);
         fclose($fp);
@@ -100,7 +101,8 @@ class ProxySystem
      * @category  Utility
      * @return    none
      */
-    public function updateScheduleLog($arrID, $messenger) {
+    public function updateScheduleLog($arrID, $messenger)
+    {
         $updateSchedule = fopen("log/run/server/server::" . $arrID, "w+");
         fwrite($updateSchedule, $messenger);
         fclose($updateSchedule);
@@ -116,7 +118,8 @@ class ProxySystem
      * @category  Utility
      * @return    none
      */
-    public function updateLog($param1, $param2, $messenger) {
+    public function updateLog($param1, $param2, $messenger)
+    {
         $updateSchedule = fopen("log/server/" . $param1 . "/" . $param2, "w+");
         fwrite($updateSchedule, $messenger);
         fclose($updateSchedule);
@@ -130,7 +133,8 @@ class ProxySystem
      * @category  Utility
      * @return    none
      */
-    public function chkErrorLog($messenger) {
+    public function chkErrorLog($messenger)
+    {
         $updateSchedule = fopen("log/error.log", "a+");
         fwrite($updateSchedule, $messenger);
         fclose($updateSchedule);
@@ -145,8 +149,9 @@ class ProxySystem
      * @category  Utility
      * @return    none
      */
-    public function checkFinialLog($fileName, $messenger) {
-        $logRun = fopen($fileName , "w+");
+    public function checkFinialLog($fileName, $messenger)
+    {
+        $logRun = fopen($fileName, "w+");
         fputs($logRun, $messenger);
         fclose($logRun);
     }
@@ -160,10 +165,10 @@ class ProxySystem
      * @category  Utility
      * @return    none
      */
-    public function checkFinishLog($fileName, $messenger) {
+    public function checkFinishLog($fileName, $messenger)
+    {
         $logRun = fopen("log/save/" .$fileName . "_close_" . date('Ymd-His') .  ".log", "w+");
         fputs($logRun, $messenger);
         fclose($logRun);
     }
-
 }

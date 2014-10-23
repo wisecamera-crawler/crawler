@@ -43,7 +43,7 @@ class GitHubAPICrawler extends WebCrawler
      * Record the input url as baseUrl
      *
      * @param string $url   The URL
-     * @param string $proxy Proxy to use    
+     * @param string $proxy Proxy to use
      */
     public function __construct($url, $proxy = null)
     {
@@ -95,7 +95,7 @@ class GitHubAPICrawler extends WebCrawler
             $txt,
             $matches
         );
-        
+
         $totalUpdate = 0;
         $totalLine = 0;
         $totalWord = 0;
@@ -139,40 +139,40 @@ class GitHubAPICrawler extends WebCrawler
      */
     public function getRating(Rating & $rating)
     {
-	  $tmp = explode("/", $this->baseUrl);
-            $owner = $tmp[3];
-            $repo = $tmp[4];
-            $URL = "https://api.github.com/repos";
-            $username= "wisecamera777@gmail.com";
-            $password="qazwsxedc123";
+        $tmp = explode("/", $this->baseUrl);
+        $owner = $tmp[3];
+        $repo = $tmp[4];
+        $URL = "https://api.github.com/repos";
+        $username= "wisecamera777@gmail.com";
+        $password="qazwsxedc123";
 
-            $ch = curl_init();
-            $user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19';
-            curl_setopt($ch, CURLOPT_URL, $URL."/$owner/$repo" );
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT,         30);
-            curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
-            curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        $ch = curl_init();
+        $user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.142 Safari/535.19';
+        curl_setopt($ch, CURLOPT_URL, $URL."/$owner/$repo");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_USERAGENT, $user_agent);
+        curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
+        curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
 
 
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, True);
-            curl_setopt($ch, CURLOPT_CAPATH, "/certificate");
-            curl_setopt($ch, CURLOPT_CAINFO, "/certificate/server.crt");
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, true);
+        curl_setopt($ch, CURLOPT_CAPATH, "/certificate");
+        curl_setopt($ch, CURLOPT_CAINFO, "/certificate/server.crt");
 
-            $txt = curl_exec($ch);
-            curl_close($ch);
+        $txt = curl_exec($ch);
+        curl_close($ch);
 
-            //var_dump($txt);
-            $decode = json_decode($txt,true);
-           // echo "Fork:".$decode["network_count"]."<br>";
-           // echo "Watch:".$decode["subscribers_count"]."<br>";
-           // echo "Star:".$decode["stargazers_count"]."<br>";
+        //var_dump($txt);
+        $decode = json_decode($txt, true);
+        // echo "Fork:".$decode["network_count"]."<br>";
+        // echo "Watch:".$decode["subscribers_count"]."<br>";
+        // echo "Star:".$decode["stargazers_count"]."<br>";
 
-            $rating->star = $decode["stargazers_count"];
-            $rating->watch = $decode["subscribers_count"];
-            $rating->fork = $decode["network_count"];
+        $rating->star = $decode["stargazers_count"];
+        $rating->watch = $decode["subscribers_count"];
+        $rating->fork = $decode["network_count"];
 
 
     }
